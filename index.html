@@ -1029,7 +1029,7 @@ $('storyForm').addEventListener('submit',async e=>{e.preventDefault();
 
 /* ---------- 기프티콘 추첨 (분리형) ----------
    팀에서 만든 구글 폼 주소를 아래 REWARD_FORM에 붙여 넣으세요. 비워 두면 '준비 중'으로 보여요. */
-const REWARD_FORM='';
+const REWARD_FORM='https://forms.gle/QJ1Lttuke4xXiAU27';
 function showReward(){const box=$('rewardBox'),a=$('rewardLink');box.hidden=false;
   if(REWARD_FORM){a.href=REWARD_FORM;a.removeAttribute('aria-disabled');a.style.pointerEvents='';a.style.opacity='';$('rewardNote').hidden=true;}
   else{a.removeAttribute('href');a.setAttribute('aria-disabled','true');a.style.pointerEvents='none';a.style.opacity='.5';$('rewardNote').hidden=false;}

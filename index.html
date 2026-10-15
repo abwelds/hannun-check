@@ -1,0 +1,784 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="한부모가족이 내 상황에 맞는 복지를 찾고, 이용 경험을 남기고, 모인 목소리를 정책 제안으로 잇는 한눈복지">
+<title>한눈복지</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@700&family=IBM+Plex+Sans+KR:wght@400;500;700&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+/* Layout: 상단 탭 앱. 홈은 팀 와이어프레임대로 왼쪽(우리집 정보 + 내 복지 현황) / 오른쪽(한부모 가족 소통 창구). 좁은 화면에선 한 열 */
+:root{
+  --bg:#f3f5f2; --surface:#fff; --ink:#1d2b2a; --muted:#5b6967; --line:#d8dfdb;
+  --accent:#1f6f62; --accent-soft:#e1efea; --on-accent:#fff;
+  --ok:#2f7d4f; --ok-soft:#e3f2e8; --check:#a86a12; --check-soft:#fbf0dc; --over:#7a5ab0; --over-soft:#eee8f7;
+  --c1:#1f6f62; --c2:#c2562f; --c3:#3b6fb6; --c4:#8a6a2f; --c5:#7a5ab0;
+  --grid:#e3e8e5;
+  --f-display:"Gowun Batang","Nanum Myeongjo",serif;
+  --f-body:"IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#121817; --surface:#1a2221; --ink:#e4ece9; --muted:#9aaaa6; --line:#2c3836;
+  --accent:#5fbfaa; --accent-soft:#1d3531; --on-accent:#0d1514;
+  --ok:#6cc58f; --ok-soft:#1c3226; --check:#e3b15c; --check-soft:#36291a; --over:#b39ae0; --over-soft:#2a2238;
+  --c1:#5fbfaa; --c2:#ec8c66; --c3:#7aa7e6; --c4:#d1b06c; --c5:#b39ae0; --grid:#26302e; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#121817; --surface:#1a2221; --ink:#e4ece9; --muted:#9aaaa6; --line:#2c3836;
+  --accent:#5fbfaa; --accent-soft:#1d3531; --on-accent:#0d1514;
+  --ok:#6cc58f; --ok-soft:#1c3226; --check:#e3b15c; --check-soft:#36291a; --over:#b39ae0; --over-soft:#2a2238;
+  --c1:#5fbfaa; --c2:#ec8c66; --c3:#7aa7e6; --c4:#d1b06c; --c5:#b39ae0; --grid:#26302e; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.6;margin:0}
+.wrap{max-width:1120px;margin:0 auto;padding-inline:20px;padding-block:16px 56px}
+h1,h2,h3,h4{text-wrap:balance}
+a{color:var(--accent)}
+button{font:inherit;cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+header.top{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px 16px;padding-bottom:12px;border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.brand b{font-family:var(--f-display);font-size:28px;letter-spacing:-.5px;cursor:pointer}
+.brand span{color:var(--muted);font-size:13.5px}
+nav.tabs{display:flex;gap:2px;overflow-x:auto;margin:12px 0 20px;border-bottom:1px solid var(--line)}
+nav.tabs button{background:none;border:none;border-bottom:2px solid transparent;padding:10px 12px;color:var(--muted);white-space:nowrap;font-size:14.5px}
+nav.tabs button[aria-selected=true]{color:var(--ink);border-bottom-color:var(--accent);font-weight:700}
+
+.btn{border-radius:10px;padding:10px 16px;border:1px solid var(--line);background:var(--surface);color:var(--ink);font-size:14.5px}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--on-accent);font-weight:700}
+.btn.small{padding:6px 12px;font-size:13px;border-radius:8px}
+.btn.ghost{background:transparent}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.muted{color:var(--muted)}
+.small{font-size:13px}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px}
+.panel h2{margin:0 0 4px;font-size:18px}
+.panel .sub{margin:0 0 12px;color:var(--muted);font-size:13.5px}
+.notice{font-size:13px;color:var(--muted);background:var(--bg);border-radius:10px;padding:10px 12px}
+.pill{display:inline-block;font-size:12px;padding:2px 9px;border-radius:999px}
+.pill.ok{background:var(--ok-soft);color:var(--ok)} .pill.check{background:var(--check-soft);color:var(--check)} .pill.over{background:var(--over-soft);color:var(--over)}
+.pill.ex{background:var(--bg);color:var(--muted);border:1px solid var(--line)}
+
+/* home */
+.hero{display:flex;flex-direction:column;gap:6px;margin-bottom:18px}
+.hero h1{font-family:var(--f-display);font-size:clamp(24px,4vw,34px);margin:0;line-height:1.3}
+.hero p{margin:0;color:var(--muted)}
+.home{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.05fr);gap:18px;align-items:start}
+@media (max-width:820px){.home{grid-template-columns:1fr}}
+.stack{display:flex;flex-direction:column;gap:18px;min-width:0}
+dl.facts{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;margin:0 0 12px;font-size:14px}
+dl.facts dt{color:var(--muted)} dl.facts dd{margin:0}
+.cats{display:flex;flex-direction:column;gap:6px}
+.cat{display:grid;grid-template-columns:12px 1fr auto;gap:10px;align-items:center;padding:9px 10px;border-radius:10px;background:var(--bg);border:none;color:var(--ink);text-align:left;width:100%}
+.cat i{width:10px;height:10px;border-radius:3px}
+.cat .n{font-family:var(--f-mono);font-size:13px;color:var(--muted)}
+.voicebox{display:flex;flex-direction:column;gap:14px}
+.quote{border-left:3px solid var(--accent);padding:4px 0 4px 12px;font-size:15px}
+.quote small{display:block;color:var(--muted);font-size:12px;margin-top:2px}
+.bigcount{font-family:var(--f-mono);font-size:28px}
+.tiles{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media (max-width:440px){.tiles{grid-template-columns:1fr}}
+.tile{border:1px solid var(--line);border-radius:12px;padding:14px;background:var(--surface);text-align:left;color:var(--ink);display:flex;flex-direction:column;gap:4px}
+.tile b{font-size:15px} .tile span{font-size:13px;color:var(--muted)}
+.tile.feature{background:var(--accent-soft);border-color:transparent}
+
+/* finder */
+.steps{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap}
+.steps span{font-size:12.5px;padding:4px 10px;border-radius:999px;background:var(--bg);color:var(--muted)}
+.steps span.on{background:var(--accent);color:var(--on-accent)}
+fieldset{border:none;padding:0;margin:0 0 18px}
+legend{font-weight:700;margin-bottom:8px;font-size:15px}
+.opts{display:flex;flex-wrap:wrap;gap:8px}
+.opt{position:relative}
+.opt input{position:absolute;opacity:0;pointer-events:none}
+.opt span{display:inline-block;border:1px solid var(--line);border-radius:10px;padding:8px 14px;background:var(--surface);font-size:14px}
+.opt input:checked+span{border-color:var(--accent);background:var(--accent-soft);font-weight:700}
+.opt input:focus-visible+span{outline:2px solid var(--accent);outline-offset:2px}
+.kidrow{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-bottom:8px}
+.kidrow label{font-size:13.5px;color:var(--muted);min-width:52px}
+select,textarea,input[type=text]{font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:8px 10px}
+textarea{width:100%;min-height:76px;resize:vertical}
+.wizard-nav{display:flex;justify-content:space-between;gap:8px;margin-top:6px}
+
+.result-head{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:10px;margin-bottom:12px}
+.result-head h2{margin:0;font-size:22px}
+.legend{display:flex;flex-wrap:wrap;gap:10px;font-size:12.5px;color:var(--muted)}
+.group{margin-bottom:22px}
+.group>h3{font-size:15px;margin:0 0 8px;display:flex;align-items:center;gap:8px}
+.group>h3 i{width:10px;height:10px;border-radius:3px}
+.cards{display:flex;flex-direction:column;gap:10px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px;display:flex;flex-direction:column;gap:8px}
+.card .top{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.card .name{font-weight:700;font-size:15.5px}
+.card .org{font-size:12px;color:var(--muted)}
+.card .amt{font-family:var(--f-mono);font-size:13.5px;white-space:nowrap}
+.card .why{font-size:13.5px;color:var(--muted);margin:0}
+.card details summary{cursor:pointer;font-size:13.5px;color:var(--accent)}
+.card details.expd{border-top:1px dashed var(--line);padding-top:8px}
+.card details.expd summary{color:var(--ink);font-weight:500}
+.card details.expd .exp{border-top:none;padding-top:8px}
+.card dl{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;font-size:13.5px;margin:8px 0 0}
+.card dl dt{color:var(--muted)} .card dl dd{margin:0}
+.exp{border-top:1px dashed var(--line);padding-top:10px;display:flex;flex-direction:column;gap:8px}
+.exp p{margin:0;font-size:13.5px;font-weight:500}
+.exp .opts .opt span{padding:5px 10px;font-size:13px}
+.thanks{font-size:13px;color:var(--ok)}
+.taper{font-size:13px;background:var(--over-soft);border-radius:8px;padding:8px 10px}
+details.na{font-size:13.5px;color:var(--muted);margin-top:6px}
+details.na ul{margin:6px 0 0;padding-left:18px}
+.cta-band{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;background:var(--accent-soft);border-radius:12px;padding:14px 16px;margin-top:10px}
+
+/* story */
+.qblock{margin-bottom:16px}
+.qblock label{display:block;font-weight:500;margin-bottom:6px;font-size:14.5px}
+.qblock .hint{font-size:12.5px;color:var(--muted);margin:-2px 0 6px}
+.qblock.main{background:var(--accent-soft);border-radius:12px;padding:14px}
+.chk{display:flex;gap:8px;align-items:flex-start;font-size:14px;margin-bottom:6px}
+.chk input{margin-top:5px;accent-color:var(--accent)}
+.consent{background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin-bottom:18px}
+.consent h3{margin:0 0 6px;font-size:15px}
+.consent ul{margin:0 0 10px;padding-left:18px;font-size:13.5px;color:var(--muted);display:flex;flex-direction:column;gap:4px}
+.consent b{color:var(--ink);font-weight:500}
+.req{font-size:11.5px;font-weight:500;color:var(--accent);background:var(--accent-soft);border-radius:999px;padding:1px 7px;margin-left:4px;vertical-align:middle}
+.mix{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.mix span{font-size:12.5px;background:var(--bg);border-radius:999px;padding:3px 10px}
+.mix span b{font-family:var(--f-mono);font-weight:500}
+.method{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:10px}
+@media (max-width:820px){.method{grid-template-columns:1fr}}
+.method div{border:1px solid var(--line);border-radius:12px;padding:12px 14px;font-size:13.5px}
+.method b{display:block;font-size:14.5px;margin-bottom:2px}
+.limit{background:var(--check-soft);border-radius:12px;padding:12px 14px;font-size:14px;margin-top:12px}
+
+/* voices */
+.vgrid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:18px;align-items:start}
+@media (max-width:820px){.vgrid{grid-template-columns:1fr}}
+.bars{display:flex;flex-direction:column;gap:8px}
+.bar{display:grid;grid-template-columns:110px 1fr 48px;gap:10px;align-items:center;font-size:13.5px}
+.bar .track{height:12px;background:var(--grid);border-radius:6px;overflow:hidden}
+.bar .fill{height:100%;background:var(--accent);border-radius:6px}
+.bar .v{font-family:var(--f-mono);font-size:12.5px;text-align:right;color:var(--muted)}
+.vlist{display:flex;flex-direction:column;gap:10px;max-height:560px;overflow:auto;padding-right:4px}
+.vcard{border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:var(--surface)}
+.vcard p{margin:0 0 6px;font-size:14.5px}
+.vcard .meta{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:12px;color:var(--muted)}
+.filters{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.filters button{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;padding:4px 12px;font-size:13px}
+.filters button[aria-pressed=true]{background:var(--accent);color:var(--on-accent);border-color:var(--accent)}
+.empty{border:1px dashed var(--line);border-radius:12px;padding:18px;text-align:center;color:var(--muted);font-size:14px}
+table.exp-t{width:100%;border-collapse:collapse;font-size:13px}
+table.exp-t th,table.exp-t td{padding:6px 8px;border-bottom:1px solid var(--line);text-align:right;font-variant-numeric:tabular-nums}
+table.exp-t th:first-child,table.exp-t td:first-child{text-align:left}
+.tablewrap{overflow-x:auto}
+
+/* type test */
+.tq{margin-bottom:14px}
+.tq p{margin:0 0 6px;font-weight:500}
+.ab{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+@media (max-width:520px){.ab{grid-template-columns:1fr}}
+.ab .opt span{display:block;height:100%}
+.typecard{border-radius:14px;padding:18px;background:var(--accent-soft);display:flex;flex-direction:column;gap:6px}
+.typecard h3{margin:0;font-family:var(--f-display);font-size:24px}
+.quad{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.quad div{border:1px solid var(--line);border-radius:10px;padding:10px;font-size:13px;background:var(--surface)}
+.quad div.me{border-color:var(--accent);border-width:2px}
+.quad b{display:block;font-size:14px}
+
+/* proposal */
+.prop{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+@media (max-width:820px){.prop{grid-template-columns:1fr}}
+.prop .panel h3{margin:0 0 6px;font-size:16px}
+.prop .panel p{margin:0;font-size:14px;color:var(--muted)}
+.prop .panel .k{font-family:var(--f-mono);font-size:12px;color:var(--accent)}
+.def{font-family:var(--f-display);font-size:clamp(18px,2.6vw,22px);line-height:1.55;margin:0}
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+@media (max-width:820px){.stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+.stat b{font-family:var(--f-mono);font-size:22px;display:block}
+.stat span{font-size:12.5px;color:var(--muted)}
+.simctl{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:10px 0}
+@media (max-width:560px){.simctl{grid-template-columns:1fr}}
+input[type=range]{width:100%;accent-color:var(--accent)}
+.chartbox{overflow-x:auto}
+.chartbox svg{display:block;width:100%;min-width:520px;height:auto}
+.cmp{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+@media (max-width:560px){.cmp{grid-template-columns:1fr}}
+.cmp div{border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:13.5px}
+.cmp b{font-family:var(--f-mono);font-size:18px}
+section.page>*+*{margin-top:18px}
+footer{margin-top:40px;padding-top:14px;border-top:1px solid var(--line);font-size:12.5px;color:var(--muted)}
+footer ul{margin:6px 0;padding-left:18px}
+footer a{color:var(--muted)}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:10px;font-size:14px;z-index:10}
+</style>
+</head>
+<body>
+
+
+<div class="wrap">
+  <header class="top">
+    <div class="brand"><b id="goHome" role="link" tabindex="0">한눈복지</b><span>내게 필요한 복지, 내가 겪은 경험, 우리가 바꿀 정책</span></div>
+    <span class="pill ex">가족정책론 사회혁신 프로젝트 · 프로토타입</span>
+  </header>
+  <nav class="tabs" role="tablist" aria-label="메뉴">
+    <button role="tab" data-p="home" aria-selected="true">홈</button>
+    <button role="tab" data-p="find" aria-selected="false">복지 찾기</button>
+    <button role="tab" data-p="story" aria-selected="false">이야기 남기기</button>
+    <button role="tab" data-p="voices" aria-selected="false">목소리 모아보기</button>
+    <button role="tab" data-p="test" aria-selected="false">정책 유형 테스트</button>
+    <button role="tab" data-p="proposal" aria-selected="false">정책 제안</button>
+  </nav>
+
+  <!-- HOME -->
+  <section class="page" id="p-home">
+    <div class="hero">
+      <h1>나에게 필요한 복지를 찾고,<br>우리의 경험을 함께 나눠요.</h1>
+      <p>로그인 없이 몇 가지 질문에 답하면 확인해 볼 만한 한부모 지원을 찾아 드려요.</p>
+      <div class="row" style="margin-top:8px"><button class="btn primary" data-go="find">내가 받을 수 있는 복지 찾기</button><button class="btn" data-go="story">한부모 이야기 남기기</button></div>
+    </div>
+    <div class="home">
+      <div class="stack">
+        <div class="panel" aria-labelledby="h-house">
+          <h2 id="h-house">우리집 정보</h2>
+          <div id="houseBox"></div>
+        </div>
+        <div class="panel" aria-labelledby="h-status">
+          <h2 id="h-status">내 복지 현황</h2>
+          <p class="sub" id="statusSub">복지 찾기를 마치면 분야별로 확인해 볼 지원 수가 표시돼요.</p>
+          <div class="cats" id="homeCats"></div>
+        </div>
+      </div>
+      <div class="panel voicebox" aria-labelledby="h-comm">
+        <div><h2 id="h-comm">한부모 가족 소통 창구</h2><p class="sub" style="margin:0">복지를 이용하며 겪은 일을 남기면, 모인 목소리가 정책 제안이 돼요.</p></div>
+        <div id="homeQuote"></div>
+        <div class="row" style="justify-content:space-between"><div><span class="bigcount" id="homeCount">0</span> <span class="muted small">개의 이야기가 모였어요 (예시 포함)</span></div><button class="btn small" data-go="voices">목소리 살펴보기</button></div>
+        <div class="tiles">
+          <button class="tile feature" data-go="story"><b>이야기 남기기</b><span>지원제도가 있어도 해결되지 않았던 문제를 들려주세요</span></button>
+          <button class="tile" data-go="voices"><b>목소리 모아보기</b><span>분야별로 어떤 어려움이 반복되는지 봐요</span></button>
+          <button class="tile" data-go="test"><b>정책 유형 테스트</b><span>6문항으로 알아보는 나의 복지 정책 성향</span></button>
+          <button class="tile" data-go="proposal"><b>우리가 발견한 문제</b><span>목소리를 모아 만든 정책 제안</span></button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FIND -->
+  <section class="page" id="p-find" hidden>
+    <div id="wizard" class="panel">
+      <div class="steps" id="stepDots"><span>1 가족 상황</span><span>2 나의 상황</span><span>3 소득</span></div>
+      <form id="wz" novalidate>
+        <div data-step="1">
+          <fieldset><legend>자녀는 몇 명인가요?</legend>
+            <div class="opts" id="kidCount"></div></fieldset>
+          <fieldset><legend>자녀의 나이를 알려주세요</legend><div id="kidAges"></div></fieldset>
+        </div>
+        <div data-step="2" hidden>
+          <fieldset><legend>현재 어떤 상황인가요?</legend><div class="opts" id="o-situ"></div></fieldset>
+          <fieldset><legend>본인의 연령대는?</legend><div class="opts" id="o-age"></div>
+            <p class="small muted" style="margin:6px 0 0">청소년·청년 한부모는 지원 기준과 금액이 달라서 여쭤봐요.</p></fieldset>
+          <fieldset><legend>사는 곳</legend><div class="opts" id="o-region"></div></fieldset>
+          <fieldset><legend>해당하는 것을 모두 골라주세요</legend>
+            <label class="chk"><input type="checkbox" id="x-unpaid">상대 부모에게 양육비를 받지 못하고 있어요</label>
+            <label class="chk"><input type="checkbox" id="x-sme">중소기업 근로자이거나 소상공인이에요</label>
+            <label class="chk"><input type="checkbox" id="x-work">고용보험에 가입해 일하고 있어요</label>
+          </fieldset>
+        </div>
+        <div data-step="3" hidden>
+          <fieldset><legend>월평균 가구소득이 어느 정도인가요?</legend><div class="opts" id="o-inc"></div>
+            <p class="small muted" style="margin:8px 0 0">정확한 금액은 묻지 않아요. 실제 지원 여부는 재산까지 합친 '소득인정액'으로 정해져요.</p></fieldset>
+        </div>
+        <div class="wizard-nav"><button type="button" class="btn ghost" id="wzBack">이전</button><button type="submit" class="btn primary" id="wzNext">다음</button></div>
+      </form>
+    </div>
+    <div id="results" hidden></div>
+  </section>
+
+  <!-- STORY -->
+  <section class="page" id="p-story" hidden>
+    <div class="panel">
+      <h2>당신의 경험을 들려주세요</h2>
+      <p class="sub">작은 불편도 정책을 바꾸는 자료가 될 수 있어요. 이름이나 연락처는 묻지 않아요.</p>
+      <form id="storyForm" novalidate>
+        <div class="consent">
+          <h3>참여 전에 읽어 주세요</h3>
+          <ul>
+            <li><b>왜 모으나요?</b> 연세대 가족정책론 수업 프로젝트로, 한부모가족이 복지를 이용하며 겪는 어려움을 모아 서울시와 성평등가족부에 낼 정책 제안의 근거로 써요.</li>
+            <li><b>무엇을 모으나요?</b> 응답자 유형, 참여 코드(있을 때만), 고른 분야와 어려움, 적어 주신 답변. 이름·연락처·주민등록번호·한부모가족증명서는 받지 않아요.</li>
+            <li><b>왜 한부모 증명을 받지 않나요?</b> 증명서에는 주민등록번호 같은 민감한 정보가 들어 있어 학생 프로젝트가 안전하게 관리하기 어려워요. 복지를 받을 때마다 증명을 반복해야 하는 부담도 우리가 바꾸려는 문제예요. 대신 한부모 지원기관과 자조모임을 통해서만 링크를 나눠요.</li>
+            <li><b>얼마나 보관하나요?</b> 프로젝트가 끝나는 2026년 12월 31일까지 보관하고 그 뒤 삭제해요.</li>
+            <li><b>공개 범위</b> 익명 공개에 동의한 답변만, 조원이 개인정보가 없는지 확인한 뒤 '목소리 모아보기'에 보여요. 원하지 않으면 글은 저장하지 않고 분야와 어려움만 집계해요.</li>
+          </ul>
+          <label class="chk"><input type="checkbox" id="s-agree">위 내용을 읽었고, 참여에 동의해요 (필수)</label>
+        </div>
+        <fieldset><legend>나는 어떤 입장에서 이야기하나요? <span class="req">필수</span></legend><div class="opts" id="o-role"></div>
+          <p class="small muted" style="margin:6px 0 0">분석할 때 입장별로 나눠 봐요. 스스로 고른 답이라 증명은 필요 없어요.</p></fieldset>
+        <fieldset><legend>참여 코드 <span class="muted small">(선택)</span></legend>
+          <input type="text" id="s-code" maxlength="16" placeholder="예: SEOUL01" autocomplete="off" style="max-width:220px;text-transform:uppercase">
+          <p class="small muted" style="margin:6px 0 0">한부모가족지원센터나 자조모임에서 받은 코드가 있으면 적어 주세요. 어느 경로로 참여했는지만 알 수 있고, 누구인지는 알 수 없어요.</p></fieldset>
+        <fieldset><legend>어떤 경험인가요? <span class="req">필수</span></legend><div class="opts" id="o-scat"></div></fieldset>
+        <div class="qblock main"><label for="s-main">지원제도가 있어도 해결되지 않았던 문제는 무엇인가요?</label>
+          <p class="hint">예: 양육비 지원을 받고 있지만, 아이가 아플 때 일을 쉬어야 해서 생활비가 부족해요.</p>
+          <textarea id="s-main" maxlength="600"></textarea></div>
+        <div class="qblock"><label for="s-exp">최근 한 달 동안 한부모 지원과 관련해 가장 어려웠던 일은?</label><textarea id="s-exp" maxlength="600"></textarea></div>
+        <div class="qblock"><label for="s-proc">지원을 신청하거나 이용하면서 불편했던 순간이 있었나요?</label><textarea id="s-proc" maxlength="600"></textarea></div>
+        <div class="qblock"><label for="s-gap">필요했지만 받을 수 없었던 지원이 있나요?</label><textarea id="s-gap" maxlength="600"></textarea></div>
+        <div class="qblock"><label for="s-chg">딱 한 가지를 바꿀 수 있다면 무엇을 바꾸고 싶나요?</label><textarea id="s-chg" maxlength="600"></textarea></div>
+        <fieldset><legend>이야기에 해당하는 어려움을 모두 골라주세요</legend><div class="opts" id="o-tags"></div></fieldset>
+        <fieldset><legend>공개 범위</legend>
+          <label class="chk"><input type="radio" name="pub" value="1" checked>익명으로 '목소리 모아보기'에 보여도 괜찮아요</label>
+          <label class="chk"><input type="radio" name="pub" value="0">공개하지 않을래요 (글은 저장하지 않고, 고른 분야와 어려움만 집계돼요)</label>
+        </fieldset>
+        <div class="notice" style="margin-bottom:12px">개인을 알아볼 수 있는 내용(이름, 동네, 직장, 아이 학교 등)은 적지 말아 주세요. 공개에 동의한 글은 확인을 거쳐 누구나 볼 수 있는 곳에 게시돼요.</div>
+        <input type="text" id="s-hp" name="website" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px">
+        <div class="row"><button class="btn primary" type="submit" id="storySubmit">이야기 남기기</button><span class="small muted" id="storyMsg" role="status"></span></div>
+      </form>
+    </div>
+  </section>
+
+  <!-- VOICES -->
+  <section class="page" id="p-voices" hidden>
+    <div><h2 style="margin:0">한부모의 목소리</h2><p class="muted" style="margin:4px 0 0">총 <b id="vCount">0</b>개의 이야기 · 지원별 이용 경험 <b id="eCount">0</b>건</p></div>
+    <div class="panel"><div class="row" style="justify-content:space-between;align-items:flex-start"><div><b>응답자 구성</b><div class="mix" id="vMix"></div></div>
+      <label class="chk" style="margin:0"><input type="checkbox" id="onlySelf">한부모 당사자 응답만 보기</label></div></div>
+    <div class="vgrid">
+      <div class="stack">
+        <div class="panel"><h3 style="margin:0 0 10px;font-size:16px">가장 많이 언급된 어려움</h3><div class="bars" id="tagBars"></div></div>
+        <div class="panel"><h3 style="margin:0 0 4px;font-size:16px">지원별 이용 경험</h3><p class="sub">복지 찾기 결과에서 남긴 응답이에요.</p><div id="expTable"></div></div>
+      </div>
+      <div class="panel"><h3 style="margin:0 0 10px;font-size:16px">사람들이 남긴 이야기</h3><div class="filters" id="vFilters"></div><div class="vlist" id="vList"></div></div>
+    </div>
+    <p class="notice">이 숫자는 이 사이트에 참여한 사람들의 응답일 뿐, 전체 한부모를 대표하는 통계가 아니에요. '예시' 표시가 붙은 이야기는 화면 구성을 보여 주기 위한 익명 예시예요.</p>
+  </section>
+
+  <!-- TEST -->
+  <section class="page" id="p-test" hidden>
+    <div class="panel" id="testBox">
+      <h2>나의 복지 정책 유형 테스트</h2>
+      <p class="sub">정답은 없어요. 6개 질문에서 더 마음이 가는 쪽을 골라 주세요.</p>
+      <form id="testForm"></form>
+    </div>
+    <div id="testResult" hidden></div>
+  </section>
+
+  <!-- PROPOSAL -->
+  <section class="page" id="p-proposal" hidden>
+    <div class="panel">
+      <span class="pill ex">우리가 발견한 문제</span>
+      <p class="def" style="margin-top:10px">한부모가족을 위한 복지제도는 많지만, 내 상황에 맞는 지원을 찾고 이용하며 겪은 경험을 정책에 전달할 창구가 없다. 그리고 소득 기준을 조금만 넘어도 지원이 한 번에 끊긴다.</p>
+    </div>
+    <div class="stats">
+      <div class="stat"><b>71.3%</b><span>양육비를 전혀 받지 못하는 한부모</span></div>
+      <div class="stat"><b>27.7만</b><span>서울의 한부모 가구 (2025 인구총조사)</span></div>
+      <div class="stat"><b>38.7%</b><span>군포시 한부모 지원 신청 중 소득 기준 초과 탈락</span></div>
+      <div class="stat"><b id="liveVoices">0</b><span>이 사이트에 모인 이야기 (예시 제외)</span></div>
+    </div>
+    <div class="prop">
+      <div class="panel"><span class="k">제안 1</span><h3>맞춤형 복지 통합 안내</h3><p>여러 기관에 흩어진 한부모 지원을 개인 상황에 맞게 묶어 안내하고, 받는 지원·놓친 지원·탈락한 지원을 한 화면에서 보여 줍니다.</p></div>
+      <div class="panel"><span class="k">제안 2</span><h3>정책 이용 경험 상시 수집</h3><p>3년마다 하는 실태조사와 별도로, 한부모의 이용 경험과 개선 요구를 온라인으로 계속 모읍니다.</p></div>
+      <div class="panel"><span class="k">제안 3</span><h3>당사자 의견의 정책 환류 + 점진적 감액</h3><p>반복되는 문제를 서울시와 성평등가족부에 전달합니다. 첫 과제로 청소년 한부모에게만 있는 서울형 감액 구간을 모든 한부모로 넓히자고 제안합니다.</p></div>
+    </div>
+    <div class="panel">
+      <h2>점진적 감액제 시뮬레이터</h2>
+      <p class="sub">지금 아동양육비는 소득인정액이 기준 중위소득 65%를 넘으면 전액 끊겨요. 서서히 줄이면 어떻게 달라지는지 확인해 보세요. (자녀 2명, 3인 가구 예시)</p>
+      <div class="simctl">
+        <label class="small">월 소득인정액: <b id="simIncL"></b><input id="simInc" type="range" min="250" max="550" step="5" value="360"></label>
+        <label class="small">감액이 끝나는 지점: <b id="simEndL"></b><input id="simEnd" type="range" min="80" max="100" step="5" value="85"></label>
+      </div>
+      <div class="chartbox"><svg id="chart" viewBox="0 0 640 280" role="img" aria-label="소득에 따른 근로소득과 아동양육비 합계"></svg></div>
+      <div class="legend" style="margin-top:6px"><span><b style="color:var(--c2)">━</b> 현행 (기준 넘으면 0원)</span><span><b style="color:var(--c1)">━</b> 점진적 감액제 (제안)</span></div>
+      <div class="cmp"><div>현행: 근로소득 + 양육비 <b id="cA"></b></div><div>감액제: 근로소득 + 양육비 <b id="cB"></b></div></div>
+      <p class="small muted" style="margin:10px 0 0">아동양육비만 반영한 단순 모형이에요. 감액 방식은 조별 설계 예시예요. 서울시는 이미 청소년 한부모(24세 이하)에게만 중위소득 65~90% 구간에 서울형 아동양육비 월 20만원을 주고 있고, 경기도는 중위소득 100% 이하 한부모에게 월 10만원을 따로 지급해요.</p>
+    </div>
+    <div class="panel">
+      <h2>목소리는 이렇게 모아요</h2>
+      <p class="sub">한부모가족증명서처럼 민감한 정보는 받지 않고, 세 가지 방법을 함께 써서 신뢰도를 높였어요.</p>
+      <div class="method">
+        <div><b>① 응답자 유형 직접 선택</b>당사자 · 자녀 · 실무자 · 기타 중 스스로 고르게 하고, 분석할 때 당사자 응답을 따로 봐요.</div>
+        <div><b>② 기관을 통한 배포</b>링크는 한부모가족지원센터와 자조모임을 통해서만 나눠요. 기관별 참여 코드로 어느 경로로 들어왔는지 구분해요.</div>
+        <div><b>③ 실무자 인터뷰</b>서울시 한부모가족지원센터 실무자 인터뷰로 사이트에 모인 의견을 확인하고 보완해요.</div>
+      </div>
+      <div class="limit"><b>한계이자 제안의 근거:</b> 학생이 만든 사이트는 응답자가 실제 한부모인지 확인할 수 없어요. 그래서 이런 창구는 공공이 운영해야 복지로 인증과 연계해 믿을 수 있는 당사자 의견을 모을 수 있어요. 이것이 제안 2의 이유예요.</div>
+    </div>
+    <div class="panel">
+      <h2>어디에 제안하나요</h2>
+      <p class="sub">정부 시스템은 바꿀 수 없으니, 우리가 직접 할 수 있는 경로를 택했어요.</p>
+      <ol style="margin:0;padding-left:20px;font-size:14.5px">
+        <li>서울시에 정보공개청구: 한부모 아동양육비 신청 중 소득 기준 초과로 탈락한 건수 (가능하면 소득 구간별)</li>
+        <li>서울시 시민제안 플랫폼 '상상대로 서울'에 제안: 청소년 한부모에게만 있는 서울형 아동양육비 감액 구간(중위소득 65~90%, 월 20만원)을 모든 한부모로 확대. 30일 안에 공감 50개를 받으면 담당 부서가 답변해요</li>
+        <li>서울시의회 보건복지위원회 의원에게 「서울특별시 한부모가족 지원에 관한 조례」 개정 검토 요청</li>
+        <li>국민신문고 국민제안으로 성평등가족부에 아동양육비 점진적 감액제 제안</li>
+        <li>센터 실무자 인터뷰와 이 사이트에 모인 목소리(당사자 응답 중심)를 근거 자료로 첨부</li>
+      </ol>
+    </div>
+  </section>
+
+  <footer>
+    한눈복지는 연세대 가족정책론 수강생이 만든 프로토타입이에요. 정부 시스템과 연결되어 있지 않고, 결과는 지원 자격을 판정하지 않아요. 실제 신청과 자격 확인은 <a href="https://www.bokjiro.go.kr" target="_blank" rel="noopener">복지로</a>, 주소지 동주민센터, 서울시 가족담당관(02-2133-6564), 서울시 한부모가족지원센터(02-861-3020)에서 해 주세요. 금액·기준은 2026년 10월 기준이에요.
+    <ul>
+      <li><a href="https://www.easylaw.go.kr/CSP/CnpClsMainBtr.laf?popMenu=ov&csmSeq=696&ccfNo=3&cciNo=1&cnpClsNo=1" target="_blank" rel="noopener">찾기쉬운 생활법령정보 — 한부모가족 복지급여</a> · <a href="https://www.mogef.go.kr/sp/fam/sp_fam_f006.do" target="_blank" rel="noopener">성평등가족부 한부모가족 지원</a></li>
+      <li><a href="https://news.seoul.go.kr/welfare/archives/107279" target="_blank" rel="noopener">서울시 한부모가족지원센터 사업</a> · <a href="https://news.seoul.go.kr/welfare/archives/554926" target="_blank" rel="noopener">서울형 아동양육비 (청소년 한부모)</a> · <a href="https://idea.seoul.go.kr/" target="_blank" rel="noopener">상상대로 서울</a> · <a href="https://www.newsis.com/view/NISX20260916_0003792761" target="_blank" rel="noopener">IBK·성평등가족부 미혼·한부모 지원 (2026.9.17)</a></li>
+      <li>「2024년 한부모가족 실태조사」(여성가족부, 2025.3.30) · <a href="https://www.gyeongginambu.com/news/article.html?no=41646" target="_blank" rel="noopener">군포시 한부모 지원 탈락 현황</a> · <a href="https://edaily.co.kr/News/Read?mediaCodeNo=257&newsId=03030726638793144" target="_blank" rel="noopener">경기도 한부모 아동양육비 확대</a></li>
+    </ul>
+  </footer>
+</div>
+<div class="toast" id="toast" hidden role="status"></div>
+
+<script>
+(function(){
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const MED={1:256.4238,2:419.9292,3:535.9036,4:649.4738,5:755.6719,6:855.5952}; // 2026 기준 중위소득(만원/월)
+const TODAY=new Date(), ADV_FREE=new Date('2026-10-29T00:00:00+09:00');
+const CATS=[
+  {id:'econ',name:'경제적 지원',color:'var(--c1)'},
+  {id:'care',name:'양육 및 돌봄',color:'var(--c2)'},
+  {id:'mind',name:'심리 및 정서 상담',color:'var(--c3)'},
+  {id:'house',name:'주거 및 법률',color:'var(--c4)'},
+  {id:'etc',name:'기타 (생활·자립)',color:'var(--c5)'}];
+const AGES=[['0-1','0~1세'],['2-5','2~5세'],['elem','초등학생'],['teen','중·고등학생'],['adult','18세 이상']];
+const INC=[['0','200만원 미만',0,200],['1','200~300만원',200,300],['2','300~400만원',300,400],['3','400~500만원',400,500],['4','500만원 이상',500,1e9],['x','잘 모르겠어요',null,null]];
+const SITU=[['div','이혼·별거'],['wid','사별'],['unm','미혼 한부모'],['etc','기타']];
+const PAGE=[['y','24세 이하'],['m','25~34세'],['o','35세 이상']];
+const REG=[['seoul','서울'],['other','서울 밖']];
+const STAGS=[['info','정보·행정'],['money','생활비·소득'],['care','돌봄 공백'],['house','주거'],['work','일·취업'],['support','양육비'],['mind','마음·관계'],['etc','기타']];
+const ROLES=[['self','한부모 당사자'],['child','한부모가정에서 자란 자녀'],['worker','현장 실무자 (센터·공무원 등)'],['other','기타 (관심 있는 시민 등)']];
+const RSHORT={self:'당사자',child:'자녀',worker:'실무자',other:'기타'};
+const SCATS=[['apply','복지 신청 경험'],['care','양육·돌봄 경험'],['house','주거 경험'],['work','일·취업 경험'],['edu','교육 경험'],['support','양육비 경험'],['etc','기타']];
+
+/* ---------- state ---------- */
+const KEY='hannun-v2';
+let S=load();
+function blank(){return {kids:[ 'elem' ],situ:null,page:null,region:null,unpaid:false,sme:false,work:false,inc:null,done:false,exp:{}}}
+function load(){try{const v=JSON.parse(localStorage.getItem(KEY));if(v&&Array.isArray(v.kids))return Object.assign(blank(),v);}catch(e){}return blank();}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
+
+/* ---------- storage (Vercel API: /api/data, /api/submit) ---------- */
+let stories=[], exps=[], tests=[], apiOk=null;
+const local={stories:[],exps:[],tests:[]}; // 이 브라우저에서 방금 남긴 것 (서버 연결 실패 시 또는 검토 대기 표시용)
+async function initDb(){
+  try{
+    const r=await fetch('/api/data',{cache:'no-store'});
+    if(!r.ok)throw new Error(r.status);
+    const d=await r.json();
+    stories=d.stories||[]; exps=d.experiences||[]; tests=d.typetests||[]; apiOk=true;
+  }catch(e){ apiOk=false; }
+  renderAllData();
+}
+async function addDoc(col,data,localArr){
+  data.createdAt=Date.now();
+  try{
+    const r=await fetch('/api/submit',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({kind:col,data,hp:$('s-hp')?$('s-hp').value:''})});
+    if(!r.ok)throw new Error(r.status);
+    if(col==='stories'){ data.pending=true; localArr.unshift(data); }
+    else localArr.unshift(data);
+    renderAllData(); return true;
+  }catch(e){ localArr.unshift(data); renderAllData(); return false; }
+}
+const allStories=()=>local.stories.concat(stories);
+const allExps=()=>local.exps.concat(exps);
+const allTests=()=>local.tests.concat(tests);
+function toast(t){const el=$('toast');el.textContent=t;el.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(()=>el.hidden=true,2600);}
+
+/* ---------- nav ---------- */
+const PAGES=['home','find','story','voices','test','proposal'];
+function go(p){if(!PAGES.includes(p))p='home';PAGES.forEach(n=>$('p-'+n).hidden=n!==p);
+  document.querySelectorAll('nav.tabs button').forEach(b=>b.setAttribute('aria-selected',b.dataset.p===p));
+  window.scrollTo({top:0});
+  if(p==='proposal')renderSim();}
+document.addEventListener('click',e=>{const t=e.target.closest('[data-go],nav.tabs button');if(!t)return;
+  if(t.tagName==='A')e.preventDefault();
+  go(t.dataset.go||t.dataset.p);});
+$('goHome').addEventListener('click',()=>go('home'));
+$('goHome').addEventListener('keydown',e=>{if(e.key==='Enter')go('home');});
+
+/* ---------- options helper ---------- */
+function opts(el,name,list,type,isOn,onChange){
+  el.innerHTML=list.map(([v,l])=>`<label class="opt"><input type="${type}" name="${name}" value="${v}" ${isOn(v)?'checked':''}><span>${esc(l)}</span></label>`).join('');
+  el.querySelectorAll('input').forEach(i=>i.addEventListener('change',()=>onChange(i)));
+}
+
+/* ---------- wizard ---------- */
+let step=1;
+function renderWizard(){
+  opts($('kidCount'),'kc',[['1','1명'],['2','2명'],['3','3명'],['4','4명 이상']],'radio',v=>String(Math.min(S.kids.length,4))===v,i=>{const n=+i.value;while(S.kids.length<n)S.kids.push('elem');S.kids.length=n;save();renderKids();});
+  renderKids();
+  opts($('o-situ'),'situ',SITU,'radio',v=>S.situ===v,i=>{S.situ=i.value;save();});
+  opts($('o-age'),'page',PAGE,'radio',v=>S.page===v,i=>{S.page=i.value;save();});
+  opts($('o-region'),'reg',REG,'radio',v=>S.region===v,i=>{S.region=i.value;save();});
+  opts($('o-inc'),'inc',INC.map(x=>[x[0],x[1]]),'radio',v=>S.inc===v,i=>{S.inc=i.value;save();});
+  $('x-unpaid').checked=S.unpaid;$('x-sme').checked=S.sme;$('x-work').checked=S.work;
+  showStep(S.done?1:step);
+  $('wizard').hidden=S.done; $('results').hidden=!S.done;
+  if(S.done)renderResults();
+}
+function renderKids(){
+  $('kidAges').innerHTML=S.kids.map((k,i)=>`<div class="kidrow"><label for="kid${i}">${i+1}번째</label><select id="kid${i}">${AGES.map(([v,l])=>`<option value="${v}" ${k===v?'selected':''}>${l}</option>`).join('')}</select></div>`).join('');
+  S.kids.forEach((k,i)=>$('kid'+i).addEventListener('change',e=>{S.kids[i]=e.target.value;save();}));
+}
+['x-unpaid','x-sme','x-work'].forEach(id=>$(id).addEventListener('change',e=>{S[id.slice(2)]=e.target.checked;save();}));
+function showStep(n){step=n;document.querySelectorAll('[data-step]').forEach(d=>d.hidden=+d.dataset.step!==n);
+  document.querySelectorAll('#stepDots span').forEach((s,i)=>s.classList.toggle('on',i===n-1));
+  $('wzBack').style.visibility=n===1?'hidden':'visible';$('wzNext').textContent=n===3?'결과 보기':'다음';}
+$('wzBack').addEventListener('click',()=>showStep(Math.max(1,step-1)));
+$('wz').addEventListener('submit',e=>{e.preventDefault();
+  if(step===2&&(!S.situ||!S.page||!S.region)){toast('상황, 연령대, 사는 곳을 골라 주세요');return;}
+  if(step===3&&!S.inc){toast('소득 구간을 골라 주세요');return;}
+  if(step<3){showStep(step+1);return;}
+  S.done=true;save();renderWizard();renderHome();window.scrollTo({top:0});});
+
+/* ---------- policy engine ---------- */
+function ctx(){
+  const hh=Math.min(6,1+S.kids.length), med=MED[hh];
+  const band=INC.find(x=>x[0]===S.inc)||INC[5];
+  const k=S.kids, minor=k.filter(a=>a!=='adult'), under12=k.filter(a=>['0-1','2-5','elem'].includes(a)), under6=k.filter(a=>['0-1','2-5'].includes(a)), school=k.filter(a=>['elem','teen'].includes(a));
+  return {hh,med,lo:band[2],hi:band[3],k,minor,under12,under6,school,youth:S.page==='y',young:S.page==='m',old:S.page==='o',seoul:S.region!=='other'};
+}
+function incStatus(c,ratio){ if(ratio==null||c.lo==null)return ratio==null?'ok':'check'; const t=c.med*ratio; if(c.hi<=t)return 'ok'; if(c.lo>=t)return 'over'; return 'check'; }
+const won=n=>(Math.round(n*10)/10).toLocaleString('ko-KR')+'만원';
+function policies(){
+  const c=ctx(), L=[];
+  const P=(o)=>L.push(o);
+  const hbLimit=c.youth?0.72:0.65;
+  // 경제
+  P({id:'cs',cat:'econ',name:c.youth?'청소년 한부모 아동양육비':'한부모 아동양육비',org:'성평등가족부 · 동주민센터',
+    fit:c.minor.length?'yes':'no',limit:hbLimit,
+    amt:c.youth?`월 ${c.minor.reduce((s,a)=>s+(a==='0-1'?40:37),0)}만원`:`월 ${c.minor.length*23}만원`,
+    why:c.youth?'만 24세 이하 부모, 18세 미만 자녀 1명당 월 37만원(0~1세 40만원)':'18세 미만 자녀 1명당 월 23만원',
+    who:`소득인정액이 기준 중위소득 ${Math.round(hbLimit*100)}% 이하 (${c.hh}인 가구 월 ${won(c.med*hbLimit)})`,how:'주소지 동주민센터 또는 복지로 온라인',link:'https://www.bokjiro.go.kr',taper:true});
+  P({id:'cs-young',cat:'econ',name:'청년 한부모 추가아동양육비',org:'성평등가족부',fit:(c.young&&c.minor.length)?'yes':'no',limit:0.65,amt:`월 ${c.minor.length*10}만원 추가`,
+    why:'만 25~34세 한부모, 18세 미만 자녀 1명당 월 10만원 추가',who:'아동양육비와 같은 소득 기준',how:'아동양육비와 함께 신청',link:'https://www.bokjiro.go.kr',taper:true});
+  P({id:'cs-extra',cat:'econ',name:'추가아동양육비',org:'성평등가족부',fit:(S.situ==='unm'&&c.old&&c.under6.length)?'yes':'no',limit:0.65,amt:`월 ${c.under6.length*10}만원 추가`,
+    why:'35세 이상 미혼 한부모의 만 5세 이하 자녀 1명당 월 10만원',who:'아동양육비와 같은 소득 기준',how:'아동양육비와 함께 신청',link:'https://www.bokjiro.go.kr',taper:true});
+  P({id:'seoul-youth',cat:'econ',name:'서울형 아동양육비 · 자립촉진수당',org:'서울시 · 동주민센터',fit:(c.youth&&c.seoul&&c.minor.length)?'yes':'no',limit:0.9,amt:'월 20만원 + 월 10만원',
+    why:'서울에 사는 24세 이하 청소년 한부모에게 서울시가 아동양육비를 월 20만원 더 줘요. 중위소득 65%를 넘어도 90%까지 받을 수 있어요. 자립촉진수당 월 10만원, 검정고시 학습비도 있어요',who:'서울 거주 24세 이하 한부모, 기준 중위소득 90% 이하',how:'주소지 동주민센터 또는 복지로 · 문의 서울시 가족담당관 02-2133-6564',link:'https://news.seoul.go.kr/welfare/archives/554926'});
+  P({id:'edu',cat:'econ',name:'아동교육지원비 (학용품비)',org:'성평등가족부',fit:c.school.length?'yes':'no',limit:0.65,amt:`연 ${c.school.length*10}만원`,
+    why:'초·중·고 자녀 1명당 연 10만원',who:'아동양육비와 같은 소득 기준',how:'아동양육비와 함께 신청',link:'https://www.bokjiro.go.kr',taper:true});
+  const u9=c.k.filter(a=>['0-1','2-5'].includes(a)).length, elem=c.k.filter(a=>a==='elem').length;
+  P({id:'ca',cat:'econ',name:'아동수당',org:'보건복지부',fit:u9?'yes':(elem?'maybe':'no'),limit:null,amt:'자녀 1명당 월 10만원~',
+    why:'만 9세 미만 자녀 1명당 월 10만원 (비수도권·인구감소지역은 더 많음). 소득 기준 없음'+(elem&&!u9?' · 초등 저학년만 해당':''),who:'만 9세 미만 아동',how:'복지로 또는 동주민센터 (출생신고 때 함께 신청 가능)',link:'https://www.bokjiro.go.kr'});
+  P({id:'eitc',cat:'econ',name:'근로장려금',org:'국세청',fit:S.work||S.sme?'yes':'maybe',limit:null,custom:()=>{if(c.lo==null)return 'check';return c.hi*12<=3200?'ok':(c.lo*12>=3200?'over':'check');},amt:'연 최대 285만원',
+    why:'홑벌이 가구 연 총소득 3,200만원 미만이면 소득에 따라 지급. 소득이 늘면 서서히 줄어드는 구조',who:'연 총소득 3,200만원 미만, 재산 2억 4천만원 미만',how:'매년 5월 정기신청 · 홈택스',link:'https://www.hometax.go.kr'});
+  // 돌봄
+  P({id:'idolbom',cat:'care',name:'아이돌봄서비스',org:'성평등가족부 · 아이돌봄 누리집',fit:c.under12.length?'yes':'no',limit:null,amt:'이용요금 일부 지원',
+    why:'아이돌보미가 집으로 찾아와 돌봄. 정부 지원 비율은 소득 구간에 따라 달라요',who:'만 12세 이하 아동 가정',how:'아이돌봄 누리집 또는 동주민센터',link:'https://www.idolbom.go.kr',forceCheck:true});
+  P({id:'ibk-care',cat:'care',name:'아이돌봄 본인부담금 지원',org:'IBK기업은행 × 성평등가족부',fit:(S.sme&&c.under12.length)?'yes':'no',limit:null,amt:'최대 150만원',
+    why:'중소기업근로자·소상공인 가족 아이돌봄 지원 사업에서 미혼·한부모 우선 선발',who:'중소기업 근로자·소상공인 한부모',how:'사업 공고 확인 후 신청',link:'https://www.newsis.com/view/NISX20260916_0003792761',forceCheck:true});
+  P({id:'seoul-house',cat:'care',name:'가사서비스 지원',org:'서울시 한부모가족지원센터',fit:c.seoul?'yes':'no',limit:1.8,amt:'연 최대 15회',
+    why:'청소·세탁·설거지 등 가사서비스로 일과 양육 병행을 도움',who:'서울 거주, 기준 중위소득 180% 이하 한부모',how:'서울시 한부모가족지원센터 02-861-3012',link:'https://seoulhanbumo.or.kr'});
+  // 심리
+  P({id:'seoul-counsel',cat:'mind',name:'1:1 전문 심리상담',org:'서울시 한부모가족지원센터',fit:c.seoul?'yes':'no',limit:1.0,amt:'최대 10회 무료',
+    why:'전문 상담가와 1:1 심리상담',who:'서울 거주, 기준 중위소득 100% 이하 한부모',how:'서울시 한부모가족지원센터 02-861-3020',link:'https://seoulhanbumo.or.kr'});
+  P({id:'seoul-mentor',cat:'mind',name:'밀착 생활지원 (선배 한부모 1:1)',org:'서울시 한부모가족지원센터',fit:c.seoul?'yes':'no',limit:null,amt:'무료',
+    why:'먼저 겪어 본 선배 한부모가 1:1로 정서 지원, 정보 제공, 동행을 도와요',who:'서울 거주 한부모',how:'서울시 한부모가족지원센터 02-861-3020',link:'https://seoulhanbumo.or.kr'});
+  // 주거·법률
+  const advOver=TODAY<ADV_FREE?1.5:null;
+  P({id:'adv',cat:'house',name:'양육비 선지급',org:'양육비이행관리원',fit:(S.unpaid&&c.minor.length)?'yes':'no',limit:advOver,amt:`월 ${c.minor.length*20}만원`,
+    why:'상대 부모가 양육비를 주지 않으면 국가가 자녀 1명당 월 20만원을 먼저 주고 나중에 받아내요'+(advOver?' · 2026년 10월 29일부터 소득 기준 폐지':''),who:advOver?'현재 중위소득 150% 이하 (10월 29일부터 기준 없음)':'소득 기준 없음',how:'양육비이행관리원 1644-6621',link:'https://www.childsupport.or.kr'});
+  P({id:'support',cat:'house',name:'양육비 이행지원 (상담·소송·추심)',org:'양육비이행관리원',fit:S.unpaid?'yes':'no',limit:null,amt:'상담 무료',
+    why:'양육비 상담, 협의, 소송과 추심까지 도와요',who:'양육비를 받지 못하는 한부모',how:'양육비이행관리원 1644-6621',link:'https://www.childsupport.or.kr',forceCheck:true});
+  P({id:'seoul-loan',cat:'house',name:'이사 보증금 무이자 대출',org:'서울시 한부모가족지원센터',fit:(c.seoul&&c.minor.length)?'yes':'no',limit:1.0,amt:'최대 500만원',
+    why:'이사할 때 늘어난 보증금 차액을 무이자로 빌려줘요',who:'서울 거주, 기준 중위소득 100% 이하, 18세 미만 자녀',how:'서울시 한부모가족지원센터',link:'https://seoulhanbumo.or.kr'});
+  P({id:'facility',cat:'house',name:'한부모가족복지시설',org:'성평등가족부 · 지자체',fit:c.minor.length?'maybe':'no',limit:null,amt:'주거 + 생활보조금 월 10만원',
+    why:'주거가 불안정할 때 일정 기간 머물며 자립을 준비해요. 입소 저소득 가구는 생활보조금 월 10만원',who:'시설 유형별로 기준이 달라요',how:'동주민센터 상담',link:'https://www.mogef.go.kr/sp/fam/sp_fam_f006.do',forceCheck:true});
+  // 기타
+  P({id:'ibk-life',cat:'etc',name:'On-IBK 함께 돌봄 생계비·주거비',org:'IBK기업은행 × 성평등가족부',fit:(S.page!=='o')?'yes':'no',limit:1.0,amt:'월 50만원 × 5개월, 주거비 최대 500만원',
+    why:'청년 미혼·한부모의 생계비와 보증금·이사비를 지원하고 재무상담을 함께 해요',who:'청년 미혼·한부모, 기준 중위소득 100% 이하 (세부 연령은 공고 확인)',how:'사업 공고 확인 후 신청',link:'https://www.newsis.com/view/NISX20260916_0003792761',forceCheck:true});
+  P({id:'leave',cat:'etc',name:'한부모 근로자 육아휴직 급여 특례',org:'고용노동부 · 고용센터',fit:(S.work&&c.k.some(a=>['0-1','2-5','elem'].includes(a)))?'maybe':'no',limit:null,amt:'급여 특례 적용',
+    why:'고용보험에 가입한 한부모 근로자는 육아휴직 급여에 특례가 적용돼요. 자녀 나이 조건(8세·초2 이하)을 확인하세요',who:'고용보험 가입 한부모 근로자',how:'고용24 또는 고용센터',link:'https://www.work24.go.kr',forceCheck:true});
+  P({id:'seoul-comm',cat:'etc',name:'한부모 자조모임·가족 행사',org:'서울시 한부모가족지원센터',fit:c.seoul?'yes':'no',limit:null,amt:'무료',
+    why:'비슷한 상황의 한부모와 만나고 정보를 나누는 모임과 가족 행사',who:'서울 거주 한부모',how:'서울시 한부모가족지원센터',link:'https://seoulhanbumo.or.kr'});
+  return L.map(p=>{let st;if(p.fit==='no')st='na';else if(p.custom)st=p.custom();else st=incStatus(c,p.limit);
+    if(st==='ok'&&(p.fit==='maybe'||p.forceCheck))st='check';
+    return Object.assign(p,{st});});
+}
+
+/* ---------- results ---------- */
+const STLABEL={ok:['ok','받을 가능성이 높아요'],check:['check','조건 확인이 필요해요'],over:['over','소득 기준을 넘었을 수 있어요']};
+const EXP_OPTS=[['using','이용하고 있어요'],['denied','신청했지만 받지 못했어요'],['skip','알았지만 신청하지 않았어요'],['new','오늘 처음 알았어요'],['na','해당되지 않아요']];
+const FOLLOW={using:['이용하면서 불편했던 점은?',[['complex','신청·갱신 절차가 복잡'],['small','금액이 부족'],['review','조사·서류가 부담'],['none','특별히 없음']]],
+  denied:['어떤 이유로 받지 못했나요?',[['income','소득 기준 초과'],['docs','서류·절차 문제'],['notelig','대상이 아니라고 안내받음'],['unknown','이유를 잘 모름']]],
+  skip:['신청하지 않은 이유는?',[['hard','신청 방법이 어려워서'],['time','시간이 없어서'],['stigma','주변 시선이 신경 쓰여서'],['small','금액이 작아서']]],
+  new:['이 정보를 어디에서 알고 싶었나요?',[['center','동주민센터'],['school','학교·어린이집'],['msg','문자·카카오톡'],['sns','SNS·인터넷']]]};
+function renderResults(){
+  const L=policies(), show=L.filter(p=>p.st==='ok'||p.st==='check'), over=L.filter(p=>p.st==='over'), na=L.filter(p=>p.st==='na');
+  const c=ctx(), band=INC.find(x=>x[0]===S.inc);
+  let h=`<div class="result-head"><div><p class="muted small" style="margin:0">${c.hh}인 가구 · 자녀 ${S.kids.length}명 · ${esc(band?band[1]:'')}</p><h2>확인해 볼 만한 지원 ${show.length}개를 찾았어요</h2></div>
+    <div class="row"><button class="btn small" id="reEdit">정보 수정</button></div></div>
+    <p class="notice">입력하신 정보를 기준으로 지원 가능성이 있는 제도예요. 실제 대상 여부는 소득인정액(소득 + 재산 환산액)과 관계기관 확인이 필요해요.</p>
+    <div class="legend" style="margin:10px 0 16px"><span class="pill ok">받을 가능성이 높아요</span><span class="pill check">조건 확인이 필요해요</span><span class="pill over">소득 기준을 넘었을 수 있어요</span></div>`;
+  CATS.forEach(cat=>{const items=show.filter(p=>p.cat===cat.id);if(!items.length)return;
+    h+=`<div class="group"><h3><i style="background:${cat.color}"></i>${cat.name} <span class="muted small">${items.length}</span></h3><div class="cards">${items.map(card).join('')}</div></div>`;});
+  if(over.length){h+=`<div class="group"><h3><i style="background:var(--over)"></i>소득 기준을 넘었을 수 있는 지원 <span class="muted small">${over.length}</span></h3><div class="cards">${over.map(card).join('')}</div></div>`;}
+  if(na.length)h+=`<details class="na"><summary>지금 정보로는 해당하지 않는 지원 ${na.length}개</summary><ul>${na.map(p=>`<li>${esc(p.name)}: ${esc(p.why)}</li>`).join('')}</ul></details>`;
+  h+=`<div class="cta-band"><div><b>지원이 있어도 해결되지 않은 문제가 있나요?</b><div class="small muted">남겨 주신 이야기는 정책 제안의 근거가 돼요.</div></div><button class="btn primary" data-go="story">내가 겪은 어려움 남기기</button></div>`;
+  $('results').innerHTML=h;
+  $('reEdit').addEventListener('click',()=>{S.done=false;save();step=1;renderWizard();});
+  $('results').querySelectorAll('.exp > .opts input').forEach(i=>i.addEventListener('change',onExp));
+  $('results').querySelectorAll('.follow input').forEach(i=>i.addEventListener('change',onFollow));
+}
+function card(p){
+  const [cls,lab]=STLABEL[p.st], e=S.exp[p.id];
+  let exp='';
+  if(e&&e.sent){exp=`<div class="exp"><span class="thanks">응답해 주셔서 고마워요. '${esc((EXP_OPTS.find(o=>o[0]===e.status)||[])[1]||'')}'로 기록했어요.</span></div>`;}
+  else{exp=`<details class="expd" ${e?'open':''}><summary>이 지원을 이용해 보셨나요? 경험 남기기</summary><div class="exp" data-pid="${p.id}"><div class="opts">${EXP_OPTS.map(([v,l])=>`<label class="opt"><input type="radio" name="e-${p.id}" value="${v}" ${e&&e.status===v?'checked':''}><span>${l}</span></label>`).join('')}</div>`;
+    if(e&&FOLLOW[e.status]){const [q,ol]=FOLLOW[e.status];exp+=`<div class="follow" data-pid="${p.id}"><p style="margin:6px 0">${q}</p><div class="opts">${ol.map(([v,l])=>`<label class="opt"><input type="radio" name="f-${p.id}" value="${v}"><span>${l}</span></label>`).join('')}</div></div>`;}
+    exp+='</div></details>';}
+  const taper=p.st==='over'&&p.taper?`<div class="taper">기준을 조금 넘어 지원이 한 번에 끊기는 '복지 절벽'일 수 있어요. 우리 조는 서서히 줄이는 점진적 감액제를 제안해요. <a href="#" data-go="proposal">정책 제안 보기</a></div>`:'';
+  return `<div class="card"><div class="top"><div><div class="name">${esc(p.name)}</div><div class="org">${esc(p.org)}</div></div><div style="text-align:right"><div class="amt">${esc(p.amt)}</div><span class="pill ${cls}">${lab}</span></div></div>
+  <p class="why">${esc(p.why)}</p>${taper}
+  <details><summary>자세히 보기</summary><dl><dt>지원 대상</dt><dd>${esc(p.who)}</dd><dt>지원 내용</dt><dd>${esc(p.why)}</dd><dt>신청 방법</dt><dd>${esc(p.how)}</dd><dt>공식 안내</dt><dd><a href="${p.link}" target="_blank" rel="noopener">바로가기 ↗</a></dd></dl></details>${exp}</div>`;
+}
+function onExp(e){const pid=e.target.name.slice(2), v=e.target.value;S.exp[pid]={status:v};save();
+  if(!FOLLOW[v]){sendExp(pid);return;} renderResults();}
+function onFollow(e){const pid=e.target.name.slice(2);S.exp[pid].follow=e.target.value;sendExp(pid);}
+async function sendExp(pid){const e=S.exp[pid];e.sent=true;save();renderResults();renderHome();
+  await addDoc('experiences',{policy:pid,status:e.status,follow:e.follow||null},local.exps);}
+
+/* ---------- home ---------- */
+function renderHome(){
+  if(!S.done){$('houseBox').innerHTML=`<p class="sub">아직 입력한 정보가 없어요. 몇 가지 질문에 답하면 우리집에 맞는 지원을 찾아 드려요.</p><button class="btn primary small" data-go="find">우리집 정보 입력하기</button>`;}
+  else{const c=ctx(),lab=(L,v)=>(L.find(x=>x[0]===v)||[,''])[1];
+    $('houseBox').innerHTML=`<dl class="facts"><dt>가구</dt><dd>${c.hh}인 가구 · 자녀 ${S.kids.length}명</dd><dt>자녀 나이</dt><dd>${S.kids.map(k=>lab(AGES,k)).join(', ')}</dd><dt>상황</dt><dd>${lab(SITU,S.situ)} · ${lab(PAGE,S.page)}</dd><dt>사는 곳</dt><dd>${lab(REG,S.region)}</dd><dt>월 소득</dt><dd>${lab(INC,S.inc)}</dd></dl><div class="row"><button class="btn small" id="homeEdit">수정하기</button><button class="btn small" data-go="find">결과 보기</button></div>`;
+    $('homeEdit').addEventListener('click',()=>{S.done=false;save();step=1;renderWizard();go('find');});}
+  const L=S.done?policies():[];
+  $('statusSub').textContent=S.done?'분야별로 확인해 볼 지원 수예요. 이용 중이라고 답한 지원은 따로 세요.':'복지 찾기를 마치면 분야별로 확인해 볼 지원 수가 표시돼요.';
+  $('homeCats').innerHTML=CATS.map(cat=>{const items=L.filter(p=>p.cat===cat.id&&(p.st==='ok'||p.st==='check'));const using=items.filter(p=>S.exp[p.id]&&S.exp[p.id].status==='using').length;
+    return `<button class="cat" data-go="find"><i style="background:${cat.color}"></i><span>${cat.name}</span><span class="n">${S.done?`${items.length}개${using?` · 이용 중 ${using}`:''}`:'–'}</span></button>`;}).join('');
+}
+
+/* ---------- story ---------- */
+let storyCat=null, storyRole=null; const storyTags=new Set();
+opts($('o-role'),'srole',ROLES,'radio',()=>false,i=>storyRole=i.value);
+opts($('o-scat'),'scat',SCATS,'radio',()=>false,i=>storyCat=i.value);
+opts($('o-tags'),'stag',STAGS,'checkbox',()=>false,i=>{i.checked?storyTags.add(i.value):storyTags.delete(i.value);});
+$('storyForm').addEventListener('submit',async e=>{e.preventDefault();
+  const v=id=>$(id).value.trim();
+  const texts={main:v('s-main'),exp:v('s-exp'),process:v('s-proc'),gap:v('s-gap'),change:v('s-chg')};
+  if(!$('s-agree').checked){toast('참여 안내를 읽고 동의에 체크해 주세요');$('s-agree').focus();return;}
+  if(!storyRole){toast('어떤 입장에서 이야기하는지 골라 주세요');return;}
+  const code=$('s-code').value.trim().toUpperCase();
+  if(code&&!/^[A-Z0-9-]{2,16}$/.test(code)){toast('참여 코드는 영문과 숫자로만 적어 주세요');return;}
+  if(!storyCat){toast('어떤 경험인지 골라 주세요');return;}
+  if(!Object.values(texts).some(Boolean)&&!storyTags.size){toast('질문 하나 이상에 답하거나 어려움을 골라 주세요');return;}
+  const pub=document.querySelector('input[name=pub]:checked').value==='1';
+  const doc={cat:storyCat,role:storyRole,code:code||null,tags:[...storyTags],public:pub,example:false};
+  if(pub)Object.assign(doc,texts);
+  $('storySubmit').disabled=true;
+  const ok=await addDoc('stories',doc,local.stories);
+  $('storySubmit').disabled=false;
+  $('storyForm').reset();storyCat=null;storyRole=null;storyTags.clear();if(presetCode)$('s-code').value=presetCode;
+  $('storyMsg').textContent=ok?'고마워요. 이야기가 저장됐어요. 공개에 동의한 글은 조원이 개인정보 포함 여부를 확인한 뒤 공개돼요.':'저장 서버에 연결되지 않아 이 브라우저에서만 보여요. 잠시 후 다시 시도해 주세요.';
+  toast('이야기를 남겼어요');setTimeout(()=>go('voices'),900);
+});
+
+/* ---------- voices ---------- */
+let vFilter='all', onlySelf=false;
+function renderVoices(){
+  const stAll=allStories(), ex=allExps();
+  const st=onlySelf?stAll.filter(s=>s.role==='self'):stAll;
+  const mix={self:0,child:0,worker:0,other:0};let ex_n=0,coded=0;
+  stAll.forEach(s=>{if(s.example)ex_n++;else if(s.role in mix)mix[s.role]++;if(s.code)coded++;});
+  $('vMix').innerHTML=Object.entries(mix).map(([k,n])=>`<span>${RSHORT[k]} <b>${n}</b></span>`).join('')+`<span>기관 경유(참여 코드) <b>${coded}</b></span>`+(ex_n?`<span>예시 <b>${ex_n}</b></span>`:'');
+  $('vCount').textContent=st.length;$('eCount').textContent=ex.length;$('homeCount').textContent=stAll.length;$('liveVoices').textContent=stAll.filter(s=>!s.example).length;
+  // tags
+  const cnt={};STAGS.forEach(([k])=>cnt[k]=0);let tot=0;st.forEach(s=>(s.tags||[]).forEach(t=>{if(t in cnt){cnt[t]++;tot++;}}));
+  const sorted=STAGS.map(([k,l])=>[l,cnt[k]]).sort((a,b)=>b[1]-a[1]);
+  $('tagBars').innerHTML=tot?sorted.map(([l,n])=>`<div class="bar"><span>${l}</span><div class="track"><div class="fill" style="width:${tot?n/sorted[0][1]*100:0}%"></div></div><span class="v">${Math.round(n/tot*100)}%</span></div>`).join('')+`<p class="small muted" style="margin:6px 0 0">이야기 하나에 여러 어려움을 고를 수 있어요. 비율은 전체 선택 ${tot}건 기준.</p>`:`<div class="empty">아직 집계할 이야기가 없어요.<br><button class="btn small" style="margin-top:8px" data-go="story">첫 이야기 남기기</button></div>`;
+  // experiences table
+  const POL=Object.fromEntries(policies().map(p=>[p.id,p.name]));
+  const by={};ex.forEach(r=>{if(!by[r.policy])by[r.policy]={using:0,denied:0,skip:0,new:0,na:0,n:0};if(r.status in by[r.policy]){by[r.policy][r.status]++;by[r.policy].n++;}});
+  const rows=Object.entries(by).sort((a,b)=>b[1].n-a[1].n);
+  $('expTable').innerHTML=rows.length?`<div class="tablewrap"><table class="exp-t"><thead><tr><th>지원</th><th>이용 중</th><th>신청했지만 못 받음</th><th>알았지만 미신청</th><th>처음 앎</th></tr></thead><tbody>${rows.map(([k,v])=>`<tr><td>${esc(POL[k]||k)}</td><td>${v.using}</td><td>${v.denied}</td><td>${v.skip}</td><td>${v.new}</td></tr>`).join('')}</tbody></table></div>`:`<div class="empty">복지 찾기 결과에서 '이용해 보셨나요?'에 답하면 여기에 모여요.</div>`;
+  // list
+  const fl=[['all','전체']].concat(SCATS);
+  $('vFilters').innerHTML=fl.map(([k,l])=>`<button type="button" data-f="${k}" aria-pressed="${vFilter===k}">${l}</button>`).join('');
+  $('vFilters').querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{vFilter=b.dataset.f;renderVoices();}));
+  const pubs=st.filter(s=>s.public&&(s.main||s.exp||s.gap||s.process||s.change)&&(vFilter==='all'||s.cat===vFilter));
+  const list=$('vList');list.innerHTML='';
+  if(!pubs.length){list.innerHTML=`<div class="empty">${onlySelf&&!st.length?'아직 당사자가 남긴 이야기가 없어요.':st.length?'이 분야에 공개된 이야기가 아직 없어요.':'아직 남겨진 이야기가 없어요. 첫 번째 목소리가 되어 주세요.'}</div>`;}
+  pubs.slice(0,80).forEach(s=>{const d=document.createElement('div');d.className='vcard';
+    const p=document.createElement('p');p.textContent='“'+(s.main||s.gap||s.exp||s.process||s.change)+'”';d.appendChild(p);
+    if(s.change){const q=document.createElement('p');q.className='small muted';q.textContent='바꾸고 싶은 것: '+s.change;d.appendChild(q);}
+    const m=document.createElement('div');m.className='meta';
+    if(s.role){const r=document.createElement('span');r.className='pill ok';r.textContent=RSHORT[s.role]||'기타';m.appendChild(r);}
+    const cat=document.createElement('span');cat.textContent=(SCATS.find(x=>x[0]===s.cat)||[,'기타'])[1];m.appendChild(cat);
+    if(s.code){const c2=document.createElement('span');c2.textContent='기관 경유';m.appendChild(c2);}
+    (s.tags||[]).forEach(t=>{const sp=document.createElement('span');sp.className='pill ex';sp.textContent=(STAGS.find(x=>x[0]===t)||[,''])[1];m.appendChild(sp);});
+    if(s.example){const sp=document.createElement('span');sp.className='pill check';sp.textContent='예시';m.appendChild(sp);}
+    if(s.pending){const sp=document.createElement('span');sp.className='pill over';sp.textContent='검토 후 공개 (나에게만 보임)';m.appendChild(sp);}
+    d.appendChild(m);list.appendChild(d);});
+  // home quote
+  const hq=stAll.find(s=>s.public&&s.role==='self'&&s.main)||stAll.find(s=>s.public&&s.main)||stAll.find(s=>s.public&&(s.gap||s.exp));
+  $('homeQuote').innerHTML='';
+  if(hq){const q=document.createElement('div');q.className='quote';q.textContent='“'+(hq.main||hq.gap||hq.exp)+'”';const sm=document.createElement('small');sm.textContent=hq.example?'익명 예시':'익명 · '+(RSHORT[hq.role]||'참여자');q.appendChild(sm);$('homeQuote').appendChild(q);}
+  else $('homeQuote').innerHTML='<div class="empty">아직 남겨진 이야기가 없어요.</div>';
+}
+
+/* ---------- type test ---------- */
+const TQ=[
+  {a:'C',q:'더 도움이 될 것 같은 쪽은?',A:'매달 10만원을 현금으로 받기',B:'매달 아이돌보미 4회 이용권 받기',ax:'cs'},
+  {a:'C',q:'새 예산이 생긴다면?',A:'아동양육비 금액을 올린다',B:'야간·주말 돌봄 시설을 늘린다',ax:'cs'},
+  {a:'C',q:'일을 더 하게 됐을 때 바라는 것은?',A:'지원금이 갑자기 끊기지 않는 것',B:'아이를 맡길 곳이 확실한 것',ax:'cs'},
+  {a:'T',q:'지원 기준에 대한 생각은?',A:'가장 어려운 가구에 집중해야 한다',B:'기준을 넓혀 더 많은 가구가 받아야 한다',ax:'tw'},
+  {a:'T',q:'기준을 조금 넘은 가구는?',A:'기준은 기준, 다른 지원으로 연결하면 된다',B:'금액을 서서히 줄여 가며 계속 지원한다',ax:'tw'},
+  {a:'T',q:'복지 안내 방식으로 더 좋은 것은?',A:'꼭 필요한 사람에게만 정확히 알려준다',B:'모든 한부모에게 빠짐없이 알려준다',ax:'tw'}];
+const TYPES={CT:['든든한 버팀목형','가장 어려운 가구에 현금 지원을 집중해야 한다고 봐요. 지금 제도와 가장 가까운 방향이에요.'],
+  CW:['징검다리형','현금 지원을 넓고 끊김 없이 이어야 한다고 봐요. 우리 조의 점진적 감액제와 가장 가까워요.'],
+  ST:['맞춤 돌봄형','꼭 필요한 가구에 돌봄 같은 서비스를 정확히 연결해야 한다고 봐요.'],
+  SW:['함께 키우는 마을형','돌봄과 서비스를 모든 한부모가 쓸 수 있게 넓혀야 한다고 봐요.']};
+function renderTest(){
+  $('testForm').innerHTML=TQ.map((t,i)=>`<div class="tq"><p>${i+1}. ${t.q}</p><div class="ab"><label class="opt"><input type="radio" name="t${i}" value="A"><span>${t.A}</span></label><label class="opt"><input type="radio" name="t${i}" value="B"><span>${t.B}</span></label></div></div>`).join('')+`<button class="btn primary" type="submit">결과 보기</button>`;
+}
+$('testForm').addEventListener('submit',async e=>{e.preventDefault();
+  const ans=TQ.map((t,i)=>{const r=document.querySelector(`input[name=t${i}]:checked`);return r?r.value:null;});
+  if(ans.includes(null)){toast('6개 질문에 모두 답해 주세요');return;}
+  const cs=ans.slice(0,3).filter(a=>a==='A').length>=2?'C':'S', tw=ans.slice(3).filter(a=>a==='A').length>=2?'T':'W';
+  const type=cs+tw; S.myType=type; save();
+  showType();
+  await addDoc('typetests',{type},local.tests);
+});
+function showType(){
+  if(!S.myType){$('testResult').hidden=true;return;}
+  const [nm,ds]=TYPES[S.myType]; const t=allTests(); const n={CT:0,CW:0,ST:0,SW:0};t.forEach(r=>{if(r.type in n)n[r.type]++;});const tot=t.length||1;
+  $('testResult').hidden=false;
+  $('testResult').innerHTML=`<div class="typecard"><span class="small muted">나의 복지 정책 유형</span><h3>${nm}</h3><p style="margin:0">${ds}</p>
+   <div class="quad">${Object.entries(TYPES).map(([k,[a]])=>`<div class="${k===S.myType?'me':''}"><b>${a}</b>${t.length?`참여자의 ${Math.round(n[k]/tot*100)}% (${n[k]}명)`:''}</div>`).join('')}</div>
+   <p class="small muted" style="margin:8px 0 0">가로는 현금 ↔ 서비스, 세로는 집중 ↔ 넓게예요. 강의에서 다룬 '선별과 보편' 논쟁을 쉬운 질문으로 바꾼 거예요.</p>
+   <div class="row" style="margin-top:6px"><button class="btn small" data-go="proposal">우리 조의 정책 제안 보기</button><button class="btn small ghost" id="retest">다시 하기</button></div></div>`;
+  $('retest').addEventListener('click',()=>{S.myType=null;save();renderTest();showType();});
+}
+
+/* ---------- simulator ---------- */
+function renderSim(){
+  const M=MED[3], full=46, lim=0.65, end=+$('simEnd').value/100, inc=+$('simInc').value;
+  $('simIncL').textContent=`${won(inc)} (중위 ${(inc/M*100).toFixed(1)}%)`;$('simEndL').textContent=`중위소득 ${Math.round(end*100)}%`;
+  const tap=v=>{const r=v/M;return v+(r<=lim?full:r>=end?0:full*(end-r)/(end-lim));}, cur=v=>v+(v/M<=lim?full:0);
+  const W=640,H=280,pl=48,pr=16,pt=14,pb=38,x0=250,x1=550,y0=250,y1=600;
+  const X=v=>pl+(v-x0)/(x1-x0)*(W-pl-pr), Y=v=>H-pb-(v-y0)/(y1-y0)*(H-pt-pb);
+  let s='';for(let t=y0;t<=y1;t+=50)s+=`<line x1="${pl}" x2="${W-pr}" y1="${Y(t)}" y2="${Y(t)}" stroke="var(--grid)"/><text x="${pl-6}" y="${Y(t)+4}" text-anchor="end" font-size="11" fill="var(--muted)">${t}</text>`;
+  for(let t=x0;t<=x1;t+=50)s+=`<text x="${X(t)}" y="${H-pb+16}" text-anchor="middle" font-size="11" fill="var(--muted)">${t}</text>`;
+  s+=`<text x="${(pl+W-pr)/2}" y="${H-4}" text-anchor="middle" font-size="11" fill="var(--muted)">가로: 월 소득인정액 · 세로: 근로소득 + 아동양육비 (만원)</text>`;
+  const lx=X(M*lim);s+=`<line x1="${lx}" x2="${lx}" y1="${pt}" y2="${H-pb}" stroke="var(--muted)" stroke-dasharray="3 3"/><text x="${lx+4}" y="${pt+10}" font-size="11" fill="var(--muted)">기준 65%</text>`;
+  const ex=X(Math.min(x1,M*end));s+=`<line x1="${ex}" x2="${ex}" y1="${pt}" y2="${H-pb}" stroke="var(--c1)" stroke-dasharray="2 4"/><text x="${ex+4}" y="${pt+24}" font-size="11" fill="var(--c1)">감액 끝</text>`;
+  let a='',b='';for(let v=x0;v<=x1;v+=1){a+=(a?'L':'M')+X(v).toFixed(1)+' '+Y(cur(v)).toFixed(1);b+=(b?'L':'M')+X(v).toFixed(1)+' '+Y(tap(v)).toFixed(1);}
+  s+=`<path d="${b}" fill="none" stroke="var(--c1)" stroke-width="3"/><path d="${a}" fill="none" stroke="var(--c2)" stroke-width="2.2"/>`;
+  s+=`<circle cx="${X(inc)}" cy="${Y(cur(inc))}" r="5" fill="var(--c2)" stroke="var(--surface)" stroke-width="2"/><circle cx="${X(inc)}" cy="${Y(tap(inc))}" r="5" fill="var(--c1)" stroke="var(--surface)" stroke-width="2"/>`;
+  $('chart').innerHTML=s;$('cA').textContent=won(cur(inc));$('cB').textContent=won(tap(inc));
+}
+$('onlySelf').addEventListener('change',e=>{onlySelf=e.target.checked;renderVoices();});
+$('simInc').addEventListener('input',renderSim);$('simEnd').addEventListener('input',renderSim);
+
+function renderAllData(){renderVoices();if(S.myType)showType();}
+
+/* ---------- boot ---------- */
+renderWizard();renderHome();renderTest();renderVoices();showType();
+const h=(location.hash||'').slice(1);
+var presetCode=null;
+if(/^code-[A-Za-z0-9]{2,16}$/.test(h)){presetCode=h.slice(5).toUpperCase();$('s-code').value=presetCode;go('story');}
+else go(PAGES.includes(h)?h:'home');
+initDb();
+})();
+</script>
+
+</body>
+</html>

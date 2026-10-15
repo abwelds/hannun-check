@@ -262,6 +262,56 @@ select{min-height:44px;font-size:15px}
 .card .why{font-size:14.5px !important;color:var(--ink) !important}
 .card .amt{font-size:15px !important;font-weight:700}
 a[href^="tel:"]{white-space:nowrap}
+
+/* 글자 크기 한 단계 줄이기 (필요하면 상단 '크게' 버튼으로 키움) */
+body{font-size:14px}
+.brand b{font-size:24px}
+.hero h1{font-size:clamp(21px,3.4vw,29px)}
+.hero p{font-size:14px}
+.story-banner b{font-size:15.5px}
+.story-banner span{font-size:13px}
+legend{font-size:14.5px}
+.result-head h2{font-size:19px}
+.panel h2{font-size:16.5px}
+.btn{font-size:14px}
+.opt span{font-size:14px !important;padding:9px 14px !important}
+.chk{font-size:14px !important}
+select{font-size:14px}
+.card .name{font-size:15px !important}
+.card .why{font-size:13.5px !important}
+.card .amt{font-size:14px !important}
+.sumgrid b{font-size:19px;font-family:var(--f-body);font-weight:800;letter-spacing:-.3px}
+.sumgrid span{font-size:12.5px}
+.prep ul{font-size:13.5px}
+.help{font-size:13.5px}
+nav.tabs button{font-size:14px}
+@media (max-width:560px){
+  body{font-size:13.5px}
+  .wrap{padding-inline:16px}
+  .brand b{font-size:21px}
+  .brand span{font-size:12.5px}
+  .hero{padding:18px 16px}
+  .hero h1{font-size:20px}
+  .hero p{font-size:13.5px}
+  .story-banner{padding:12px 14px}
+  .story-banner b{font-size:14.5px}
+  .panel{padding:16px}
+  .panel h2{font-size:15.5px}
+  legend{font-size:14px}
+  .result-head h2{font-size:17px}
+  .opt span{font-size:13.5px !important;padding:8px 12px !important;min-height:40px}
+  .card{padding:12px 14px}
+  .card .name{font-size:14.5px !important}
+  .card .why{font-size:13px !important}
+  .card .amt{font-size:13.5px !important}
+  .sumgrid{grid-template-columns:1fr 1fr}
+  .sumgrid b{font-size:16.5px}
+  .a11y .lab{display:none}
+  .a11y button{min-height:36px;padding:2px 8px;font-size:12.5px}
+  nav.tabs button{font-size:13.5px;padding:9px 10px}
+  .tile b{font-size:14px}
+  #buddy svg{width:58px;height:53px}
+}
 @media print{nav.tabs,.a11y,.toolbar,.expd,.cta-band,.skip,header .pill,#reEdit,footer ul{display:none !important}
  .wrap{zoom:1}.card{break-inside:avoid}details:not(.na){display:block}details>*{display:block}body{background:#fff}}
 @media (prefers-reduced-motion:reduce){*{scroll-behavior:auto !important;transition:none !important}}
@@ -292,7 +342,7 @@ a[href^="tel:"]{white-space:nowrap}
       <h1>혼자 키우는 당신에게 필요한 지원,<br>한 번에 찾아 드려요.</h1>
       <p>한부모가족 지원과 근로장려금·아동수당 같은 일반 지원은 나라·서울시·자치구마다 흩어져 있어요. 몇 가지 질문에 답하면 받을 수 있는 지원, 놓친 지원, 기준을 넘어 끊긴 지원까지 한눈에 체크해 드려요. 로그인도 증명서도 필요 없어요.</p>
       <p class="small" style="margin:4px 0 0"><b>3단계 · 약 1분</b> · 공인인증서·회원가입 없음 · 결과는 어디서(동주민센터·홈택스·전화) 신청하는지까지 묶어서 보여 드려요</p>
-      <div class="row" style="margin-top:8px"><button class="btn primary" data-go="find">우리 가족이 받을 수 있는 지원 찾기</button><button class="btn" data-go="story">한부모 이야기 남기기</button></div>
+      <div class="row" style="margin-top:8px"><button class="btn primary" data-go="find">우리 가족이 받을 수 있는 지원 찾기</button></div>
     </div>
     <div class="home">
       <div class="stack">
@@ -342,6 +392,8 @@ a[href^="tel:"]{white-space:nowrap}
             <label class="chk"><input type="checkbox" id="x-unpaid">상대 부모에게 양육비를 받지 못하고 있습니다</label>
             <label class="chk"><input type="checkbox" id="x-sme">중소기업 근로자이거나 소상공인입니다</label>
             <label class="chk"><input type="checkbox" id="x-work">고용보험에 가입해 일하고 있습니다</label>
+            <label class="chk"><input type="checkbox" id="x-etc">기타 (위에 없는 다른 상황이 있습니다)</label>
+            <p class="small muted" id="etcHint" hidden style="margin:2px 0 0 30px">어떤 상황인지 <a href="#" data-go="story">이야기 남기기</a>에 적어 주시면 지원 찾기에 더 반영하겠습니다. 지금은 위 정보만으로 지원을 찾습니다.</p>
           </fieldset>
         </div>
         <div data-step="3" hidden>
@@ -579,7 +631,7 @@ const SCATS=[['apply','복지 신청 경험'],['care','양육·돌봄 경험'],[
 /* ---------- state ---------- */
 const KEY='hannun-v2';
 let S=load();
-function blank(){return {kids:[ 'elem' ],situ:null,page:null,region:null,gu:null,unpaid:false,sme:false,work:false,inc:null,done:false,exp:{}}}
+function blank(){return {kids:[ 'elem' ],situ:null,page:null,region:null,gu:null,unpaid:false,sme:false,work:false,etc:false,inc:null,done:false,exp:{}}}
 function load(){try{const v=JSON.parse(localStorage.getItem(KEY));if(v&&Array.isArray(v.kids))return Object.assign(blank(),v);}catch(e){}return blank();}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
 
@@ -643,7 +695,7 @@ function renderWizard(){
   $('gu').innerHTML='<option value="">구를 골라 주세요</option>'+GUS.map(g=>`<option value="${g}" ${S.gu===g?'selected':''}>${g}</option>`).join('');
   $('guBox').hidden=S.region!=='seoul';
   opts($('o-inc'),'inc',INC.map(x=>[x[0],x[1]]),'radio',v=>S.inc===v,i=>{S.inc=i.value;save();});
-  $('x-unpaid').checked=S.unpaid;$('x-sme').checked=S.sme;$('x-work').checked=S.work;
+  $('x-unpaid').checked=S.unpaid;$('x-sme').checked=S.sme;$('x-work').checked=S.work;$('x-etc').checked=!!S.etc;$('etcHint').hidden=!S.etc;
   showStep(S.done?1:step);
   $('wizard').hidden=S.done; $('results').hidden=!S.done;
   if(S.done)renderResults();
@@ -653,7 +705,7 @@ function renderKids(){
   S.kids.forEach((k,i)=>$('kid'+i).addEventListener('change',e=>{S.kids[i]=e.target.value;save();}));
 }
 $('gu').addEventListener('change',e=>{S.gu=e.target.value||null;save();});
-['x-unpaid','x-sme','x-work'].forEach(id=>$(id).addEventListener('change',e=>{S[id.slice(2)]=e.target.checked;save();}));
+['x-unpaid','x-sme','x-work','x-etc'].forEach(id=>$(id).addEventListener('change',e=>{S[id.slice(2)]=e.target.checked;save();if(id==='x-etc')$('etcHint').hidden=!e.target.checked;}));
 function showStep(n){step=n;document.querySelectorAll('[data-step]').forEach(d=>d.hidden=+d.dataset.step!==n);
   document.querySelectorAll('#stepDots span:not(.count)').forEach((s,i)=>{s.classList.toggle('on',i===n-1);if(i===n-1)s.setAttribute('aria-current','step');else s.removeAttribute('aria-current');});
   $('stepCount').textContent=n+'/3단계';$('wzErr').hidden=true;

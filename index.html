@@ -420,7 +420,7 @@ nav.tabs button{font-size:14px}
             <li><b>왜 한부모 증명을 받지 않나요?</b> 증명서에는 주민등록번호 같은 민감한 정보가 들어 있어 학생 프로젝트가 안전하게 관리하기 어려워요. 복지를 받을 때마다 증명을 반복해야 하는 부담도 우리가 바꾸려는 문제예요. 대신 한부모 지원기관과 자조모임을 통해서만 링크를 나눠요.</li>
             <li><b>기프티콘 추첨은요?</b> 이야기를 남긴 뒤 원하는 분만 응모해요. 연락처는 이 사이트가 아니라 별도 구글 폼에서만 받고, 남긴 이야기와 연결하지 않아요. 기프티콘을 보낸 뒤 연락처는 바로 지워요.</li>
             <li><b>얼마나 보관하나요?</b> 프로젝트가 끝나는 2026년 12월 31일까지 보관하고 그 뒤 삭제해요.</li>
-            <li><b>공개 범위</b> 익명 공개에 동의한 답변만, 조원이 개인정보가 없는지 확인한 뒤 '목소리 모아보기'에 보여요. 원하지 않으면 글은 저장하지 않고 분야와 어려움만 집계해요.</li>
+            <li><b>공개 범위</b> 익명 공개에 동의한 답변만, 조원이 개인정보가 없는지 확인한 뒤 '목소리 모아보기'에 보여요. 공개를 원하지 않으면 글은 사이트에 보이지 않고, 조원만 정책 제안 근거로 분석하는 데 써요. 글을 남기고 싶지 않으면 글 칸을 비워 두고 어려움만 골라도 돼요.</li>
           </ul>
           <label class="chk"><input type="checkbox" id="s-agree">위 내용을 읽었고, 참여에 동의해요 (필수)</label>
         </div>
@@ -440,7 +440,7 @@ nav.tabs button{font-size:14px}
         <fieldset><legend>이야기에 해당하는 어려움을 모두 골라주세요</legend><div class="opts" id="o-tags"></div></fieldset>
         <fieldset><legend>공개 범위</legend>
           <label class="chk"><input type="radio" name="pub" value="1" checked>익명으로 '목소리 모아보기'에 보여도 괜찮아요</label>
-          <label class="chk"><input type="radio" name="pub" value="0">공개하지 않을래요 (글은 저장하지 않고, 고른 분야와 어려움만 집계돼요)</label>
+          <label class="chk"><input type="radio" name="pub" value="0">사이트에는 공개하지 말아 주세요 (조원만 읽고 정책 제안 근거로만 써요)</label>
         </fieldset>
         <div class="notice" style="margin-bottom:12px">개인을 알아볼 수 있는 내용(이름, 동네, 직장, 아이 학교 등)은 적지 말아 주세요. 공개에 동의한 글은 확인을 거쳐 누구나 볼 수 있는 곳에 게시돼요.</div>
         <input type="text" id="s-hp" name="website" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px">
@@ -1018,18 +1018,19 @@ $('storyForm').addEventListener('submit',async e=>{e.preventDefault();
   if(!Object.values(texts).some(Boolean)&&!storyTags.size){toast('질문 하나 이상에 답하거나 어려움을 골라 주세요');return;}
   const pub=document.querySelector('input[name=pub]:checked').value==='1';
   const doc={cat:storyCat,role:storyRole,code:code||null,tags:[...storyTags],public:pub,example:false};
-  if(pub)Object.assign(doc,texts);
+  Object.assign(doc,texts); // 비공개 글도 팀 분석용으로 저장 (사이트에는 안 보임)
   $('storySubmit').disabled=true;
   const ok=await addDoc('stories',doc,local.stories);
+  if(!pub&&local.stories[0]===doc)['main','exp','proc','process','gap','chg','change'].forEach(k=>delete doc[k]); // 비공개 글은 이 화면에서도 내용 숨김
   $('storySubmit').disabled=false;
   $('storyForm').reset();storyCat=null;storyRole=null;storyTags.clear();if(presetCode)$('s-code').value=presetCode;
-  $('storyMsg').textContent=ok?'고마워요. 이야기가 저장됐어요. 공개에 동의한 글은 조원이 개인정보 포함 여부를 확인한 뒤 공개돼요.':'저장 서버에 연결되지 않아 이 브라우저에서만 보여요. 잠시 후 다시 시도해 주세요.';
+  $('storyMsg').textContent=ok?(pub?'고마워요. 이야기가 저장됐어요. 조원이 개인정보 포함 여부를 확인한 뒤 공개돼요.':'고마워요. 이야기가 저장됐어요. 사이트에는 공개되지 않고, 조원만 정책 제안 근거로 읽어요.'):'저장 서버에 연결되지 않아 이 브라우저에서만 보여요. 잠시 후 다시 시도해 주세요.';
   toast('이야기를 남겼어요');showReward();
 });
 
 /* ---------- 기프티콘 추첨 (분리형) ----------
    팀에서 만든 구글 폼 주소를 아래 REWARD_FORM에 붙여 넣으세요. 비워 두면 '준비 중'으로 보여요. */
-const REWARD_FORM='https://forms.gle/QJ1Lttuke4xXiAU27';
+const REWARD_FORM='';
 function showReward(){const box=$('rewardBox'),a=$('rewardLink');box.hidden=false;
   if(REWARD_FORM){a.href=REWARD_FORM;a.removeAttribute('aria-disabled');a.style.pointerEvents='';a.style.opacity='';$('rewardNote').hidden=true;}
   else{a.removeAttribute('href');a.setAttribute('aria-disabled','true');a.style.pointerEvents='none';a.style.opacity='.5';$('rewardNote').hidden=false;}

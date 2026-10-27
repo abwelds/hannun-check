@@ -10,6 +10,14 @@ UPDATE stories SET approved = true WHERE id IN (1, 2, 3);
 -- 3) 부적절한 글 지우기 (id를 바꿔서 실행)
 DELETE FROM stories WHERE id = 4;
 
+-- 1-2) 비공개(팀 분석용) 글 보기 — 사이트에는 절대 보이지 않아요
+SELECT id, created_at, role, code, cat, tags, main, exp, process, gap, change
+FROM stories WHERE NOT is_public AND NOT example ORDER BY created_at;
+
+-- 1-3) 정책 제안 근거용: 공개·비공개 상관없이 글이 있는 모든 이야기
+SELECT id, created_at, is_public, role, cat, tags, main, exp, process, gap, change
+FROM stories WHERE NOT example AND coalesce(main, exp, process, gap, change) IS NOT NULL ORDER BY cat, created_at;
+
 -- 4) 분석용 집계
 SELECT role, cat, count(*) FROM stories WHERE NOT example GROUP BY role, cat ORDER BY 3 DESC;
 SELECT unnest(tags) AS tag, count(*) FROM stories WHERE NOT example GROUP BY 1 ORDER BY 2 DESC;

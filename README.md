@@ -146,4 +146,4 @@ GitHub는 코드 파일을 보관하는 곳이에요. Vercel은 여기 있는 �
 | `/api/data`가 404 | `api` 폴더가 GitHub에 안 올라감. 2단계 4번 방법으로 다시 올리기 |
 | `/api/data`가 500 | 데이터베이스 미연결 또는 재배포 안 함. Vercel 프로젝트 **Logs**에서 오류 확인 |
 | 고쳤는데 사이트가 그대로 | GitHub에서 Commit을 눌렀는지, Deployments에 새 배포가 Ready인지 확인. 브라우저 새로고침(Ctrl+Shift+R) |
-| 다운받은 index.html을 컴퓨터에서 바로 열면 저장이 안 됨 | 정상이에요. 저장은 Vercel에 올린 주소에서만 돼요 |
+| 다운받은 index.html을 컴퓨터에서 바로 열면 저장이 안 됨 | 정상이에요. 저장은 Vercel에 올린 주소에서만 돼요! |

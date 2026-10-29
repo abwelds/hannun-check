@@ -7,7 +7,7 @@ export default async function handler(req, res) {
   try {
     const sql = getSql(); await ensureTables(sql);
     const [st, ex, ty] = await Promise.all([
-      sql`SELECT role, code, cat, tags, is_public, approved, example, main, exp, process, gap, change,
+      sql`SELECT role, code, cat, tags, wants, helped, is_public, approved, example, opinion, main, exp, process, gap, change,
                  extract(epoch from created_at)*1000 AS t
           FROM stories ORDER BY created_at DESC LIMIT 1000`,
       sql`SELECT policy, status, follow FROM experiences ORDER BY created_at DESC LIMIT 3000`,
@@ -15,8 +15,8 @@ export default async function handler(req, res) {
     ]);
     const stories = st.map((r) => {
       const shown = r.is_public && r.approved;
-      const o = { role: r.role, code: r.code ? true : null, cat: r.cat, tags: r.tags || [], public: shown, example: r.example, createdAt: Number(r.t) };
-      if (shown) Object.assign(o, { main: r.main, exp: r.exp, process: r.process, gap: r.gap, change: r.change });
+      const o = { role: r.role, code: r.code ? true : null, cat: r.cat, tags: r.tags || [], wants: r.wants || [], helped: r.helped || [], public: shown, example: r.example, createdAt: Number(r.t) };
+      if (shown) Object.assign(o, { opinion: r.opinion, main: r.main, exp: r.exp, process: r.process, gap: r.gap, change: r.change });
       return o;
     });
     res.setHeader('Cache-Control', 'no-store');

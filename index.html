@@ -310,7 +310,7 @@ nav.tabs button{font-size:14px}
   .a11y button{min-height:36px;padding:2px 8px;font-size:12.5px}
   nav.tabs button{font-size:13.5px;padding:9px 10px}
   .tile b{font-size:14px}
-  #buddy svg{width:58px;height:53px}
+  #buddy svg{width:42px;height:38px}
 }
 @media print{nav.tabs,.a11y,.toolbar,.expd,.cta-band,.skip,header .pill,#reEdit,footer ul{display:none !important}
  .wrap{zoom:1}.card{break-inside:avoid}details:not(.na){display:block}details>*{display:block}body{background:#fff}}
@@ -468,7 +468,7 @@ html.vm .a11y .lab{display:none}
 html.vm .a11y button{min-height:36px;padding:2px 8px;font-size:12.5px}
 html.vm nav.tabs button{font-size:13.5px;padding:9px 10px}
 html.vm .tile b{font-size:14px}
-html.vm #buddy svg{width:58px;height:53px}
+html.vm #buddy svg{width:42px;height:38px}
 
 /* ================= v3 스킨: 서비스형 화면 =================
    레이아웃: 위쪽 고정 앱 바(로고·메뉴·보기 설정) + 휴대폰에서는 아래쪽 탭 바.
@@ -703,7 +703,7 @@ html.vm header.top nav.tabs{left:50%;right:auto;width:430px;transform:translateX
 #buddyBtn{display:flex !important;position:fixed;right:max(16px,env(safe-area-inset-right,0px));bottom:calc(16px + env(safe-area-inset-bottom,0px));width:auto !important;height:40px !important;border-radius:999px !important;padding:0 14px 0 10px !important;gap:6px;align-items:center;font-size:13px !important;font-weight:700;background:var(--surface) !important;border:1px solid var(--line) !important;box-shadow:0 4px 14px rgba(16,24,40,.12) !important;color:var(--ink);z-index:24}
 #buddyBtn span[aria-hidden]{font-size:18px}
 #buddyBtn .sr{position:static !important;width:auto !important;height:auto !important;clip:auto !important;overflow:visible !important;white-space:nowrap}
-.setswitch{display:none !important}
+.setswitch{display:flex !important}
 @media (max-width:760px){
   .start{padding-top:18px}
   .start h1{font-size:24px}
@@ -809,6 +809,10 @@ html.vm .s2{grid-template-columns:1fr;padding:20px !important}
 html.vm .s2-top b{font-size:46px}
 html.vm .s2-money b{font-size:22px}
 html.vm .sheet{width:100%;box-shadow:none}
+
+/* 휴대폰: 병아리 버튼은 아래 메뉴와 겹치지 않게 숨기고, 톱니바퀴 설정에서 켜고 끄기 */
+@media (max-width:760px){#buddyBtn{display:none !important}}
+html.vm #buddyBtn{display:none !important}
 </style>
 </head>
 <body>
@@ -1085,7 +1089,7 @@ html.vm .sheet{width:100%;box-shadow:none}
   <div class="sheet-body" id="dtBody"></div></div></div>
 <div class="toast" id="toast" hidden role="status"></div>
 <!-- 따라다니는 병아리 (장식용, 화면 읽기 프로그램에서는 숨김) -->
-<div id="buddy" aria-hidden="true"><svg viewBox="0 0 120 110" width="84" height="77">
+<div id="buddy" aria-hidden="true"><svg viewBox="0 0 120 110" width="56" height="51">
   <g class="b-body"><ellipse cx="60" cy="100" rx="26" ry="5" fill="rgba(0,0,0,.08)"/>
   <g class="b-leg b-l1"><path d="M50 82 L48 98 M48 98 l-6 2 M48 98 l3 3" stroke="#e8933a" stroke-width="4" stroke-linecap="round" fill="none"/></g>
   <g class="b-leg b-l2"><path d="M68 82 L70 98 M70 98 l6 2 M70 98 l-3 3" stroke="#e8933a" stroke-width="4" stroke-linecap="round" fill="none"/></g>
@@ -1098,7 +1102,7 @@ html.vm .sheet{width:100%;box-shadow:none}
   <path d="M93 40 l11 4 l-11 4 z" fill="#ef8a2e"/></g></g></svg></div>
 <button type="button" id="buddyBtn" aria-pressed="true" title="따라다니는 병아리 끄기"><span aria-hidden="true">🐥</span><span class="sr">따라다니는 병아리 끄기</span></button>
 <style>
-#buddy{position:fixed;left:0;top:0;z-index:30;pointer-events:none;will-change:transform;transition:opacity .3s}
+#buddy{position:fixed;left:0;top:0;z-index:15;pointer-events:none;will-change:transform;transition:opacity .3s}
 #buddy.off{opacity:0}
 #buddy svg{display:block;overflow:visible}
 #buddy .b-body{transform-origin:60px 100px}

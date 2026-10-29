@@ -24,6 +24,11 @@ SELECT unnest(tags) AS tag, count(*) FROM stories WHERE NOT example GROUP BY 1 O
 SELECT code, count(*) FROM stories WHERE NOT example GROUP BY code ORDER BY 2 DESC;
 SELECT policy, status, count(*) FROM experiences GROUP BY policy, status ORDER BY 1, 3 DESC;
 
+-- 5-1) 분야를 고르지 않은 글 보기 → 읽고 분류하기
+SELECT id, main, opinion, exp, process, gap FROM stories WHERE cat IS NULL AND NOT example ORDER BY created_at;
+-- 분류한 뒤 (cat 값: apply 복지 신청 / care 양육·돌봄 / house 주거 / work 일·취업 / edu 교육 / support 양육비 / etc 기타)
+-- UPDATE stories SET cat = 'care' WHERE id IN (3, 7);
+
 -- 6) 정책 제안 우선순위: '더 좋아졌으면 하는 것' 집계
 SELECT unnest(wants) AS want, count(*) FROM stories WHERE NOT example GROUP BY 1 ORDER BY 2 DESC;
 -- cliff 소득 기준 / amount 지원 금액 / apply 신청 절차·서류 / info 정보 안내 / care 돌봄 / support 양육비 이행 / house 주거 / stigma 편견·시선 / etc 기타

@@ -1248,6 +1248,15 @@ document.querySelector('nav.tabs').addEventListener('keydown',e=>{if(!['ArrowLef
 function opts(el,name,list,type,isOn,onChange){
   el.innerHTML=list.map(([v,l])=>`<label class="opt"><input type="${type}" name="${name}" value="${v}" ${isOn(v)?'checked':''}><span>${esc(l)}</span></label>`).join('');
   el.querySelectorAll('input').forEach(i=>i.addEventListener('change',()=>onChange(i)));
+  // 고른 보기를 다시 누르면 선택 해제 (자녀 수처럼 꼭 하나가 있어야 하는 질문은 제외)
+  if(type==='radio'&&name!=='kc')el.querySelectorAll('input').forEach(i=>radioToggle(i,()=>onChange({value:null,checked:false,name:i.name})));
+}
+function radioToggle(i,onClear){
+  const lab=i.closest('label');
+  const mark=()=>{i._was=i.checked;};
+  (lab||i).addEventListener('pointerdown',mark);
+  i.addEventListener('keydown',e=>{if(e.key===' '||e.key==='Enter'){if(i.checked){e.preventDefault();i.checked=false;onClear();}}});
+  i.addEventListener('click',()=>{if(i._was){i.checked=false;i._was=false;onClear();}});
 }
 
 /* ---------- wizard ---------- */
@@ -1663,6 +1672,7 @@ function showReward(){const box=$('rewardBox'),a=$('rewardLink');box.hidden=fals
   box.focus();box.scrollIntoView({block:'center'});}
 
 /* ---------- 사이트 의견 (페이지 경험) ---------- */
+document.querySelectorAll('input[name=fbr]').forEach(i=>radioToggle(i,()=>{}));
 $('fbForm').addEventListener('submit',async e=>{e.preventDefault();
   const r=document.querySelector('input[name=fbr]:checked'), t=$('fbText').value.trim();
   if(!r&&!t){$('fbMsg').textContent='만족도를 고르거나 의견을 적어 주세요.';return;}

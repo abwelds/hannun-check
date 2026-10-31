@@ -6,6 +6,12 @@
 <meta name="description" content="한부모가족이 내 상황에 맞는 복지를 찾고, 이용 경험을 남기고, 모인 목소리를 정책 제안으로 잇는 한눈체크">
 <title>한눈체크</title>
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="manifest" href="/manifest.json">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="한눈체크">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="theme-color" content="#ffffff">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@700&family=IBM+Plex+Sans+KR:wght@400;500;700&family=IBM+Plex+Mono:wght@500&display=swap">
@@ -709,6 +715,7 @@ html.vm header.top nav.tabs{left:50%;right:auto;width:430px;transform:translateX
 #buddyBtn span[aria-hidden]{font-size:18px}
 #buddyBtn .sr{position:static !important;width:auto !important;height:auto !important;clip:auto !important;overflow:visible !important;white-space:nowrap}
 .setswitch{display:flex !important}
+#installRow .btn{width:100%;min-height:38px}
 @media (max-width:760px){
   .start{padding-top:18px}
   .start h1{font-size:24px}
@@ -837,6 +844,7 @@ html.vm #buddyBtn{display:none !important}
       <div class="setpanel" id="setPanel" hidden>
         <div class="setrow"><span>글자 크기</span><div class="a11y" role="group" aria-label="글자 크기"><span class="lab">글자 크기</span><button type="button" data-z="1" aria-pressed="true">보통</button><button type="button" data-z="1.15" aria-pressed="false">크게</button><button type="button" data-z="1.3" aria-pressed="false">아주 크게</button></div></div>
         <div class="setrow"><span>화면</span><div class="viewsw" role="group" aria-label="화면 보기"><span class="lab">화면</span><button type="button" data-v="auto" aria-pressed="true">자동</button><button type="button" data-v="m" aria-pressed="false">모바일</button><button type="button" data-v="pc" aria-pressed="false">PC</button></div></div>
+        <div class="setrow" id="installRow"><span>앱처럼 쓰기</span><button type="button" class="btn small" id="installBtn">홈 화면에 추가하기</button><p class="small muted" id="installHelp" hidden style="margin:0"></p></div>
         <label class="setrow setswitch"><span>따라다니는 병아리</span><input type="checkbox" id="buddyChk"></label>
       </div>
     </div>
@@ -895,7 +903,7 @@ html.vm #buddyBtn{display:none !important}
         <div data-step="2" hidden>
           <fieldset><legend>현재 어떤 상황인가요?</legend><div class="opts" id="o-situ"></div></fieldset>
           <fieldset><legend>본인의 연령대는?</legend><div class="opts" id="o-age"></div>
-            <p class="small muted" style="margin:6px 0 0">나이에 따라 지원 기준이 달라 여쭙니다.</p></fieldset>
+            <p class="small muted" style="margin:6px 0 0">만 24세 이하는 청소년 한부모 아동양육비, 만 25~34세는 청년 한부모 추가 양육비, 만 35세 이상 미혼 한부모는 5세 이하 자녀 추가 양육비를 받을 수 있어요.</p></fieldset>
           <fieldset><legend>사는 곳</legend><div class="opts" id="o-region"></div>
             <div id="guBox" style="margin-top:10px" hidden><label for="gu" class="small muted" style="display:block;margin-bottom:4px">어느 구에 사나요? 구에서 따로 하는 한부모 지원도 찾아 드립니다</label>
             <select id="gu"></select></div></fieldset>
@@ -905,6 +913,8 @@ html.vm #buddyBtn{display:none !important}
             <p class="small muted hint2">중소기업 근로자·소상공인을 말해요. 대기업·중견기업·공공기관이 아니면 대부분 해당돼요. 정확한 기준은 업종과 매출에 따라 달라요.</p>
             <label class="chk"><input type="checkbox" id="x-work">월급에서 고용보험료가 빠져나가고 있습니다</label>
             <p class="small muted hint2">월급 명세서에 '고용보험'이 적혀 있으면 가입된 거예요. 육아휴직급여 등을 받을 때 필요해요.</p>
+            <label class="chk"><input type="checkbox" id="x-fac">한부모가족복지시설(모자가족·미혼모자 시설 등)에 살고 있습니다</label>
+            <p class="small muted hint2">시설에 살면 받을 수 없거나 달라지는 지원이 있어서 결과에 따로 표시해 드려요.</p>
             <label class="chk"><input type="checkbox" id="x-etc">기타 (위에 없는 다른 상황이 있습니다)</label>
             <p class="small muted" id="etcHint" hidden style="margin:2px 0 0 30px">다른 상황은 <a href="#" data-go="story">정책 제안 참여</a>에 적어 주세요.</p>
           </fieldset>
@@ -1182,7 +1192,7 @@ const SCATS=[['apply','지원금·신청 서류'],['care','아이 돌보기'],['
 /* ---------- state ---------- */
 const KEY='hannun-v2';
 let S=load();
-function blank(){return {kids:[ 'elem' ],situ:null,page:null,region:null,gu:null,unpaid:false,sme:false,work:false,etc:false,inc:null,done:false,exp:{}}}
+function blank(){return {kids:[ 'elem' ],situ:null,page:null,region:null,gu:null,unpaid:false,sme:false,work:false,fac:false,etc:false,inc:null,done:false,exp:{}}}
 function load(){try{const v=JSON.parse(localStorage.getItem(KEY));if(v&&Array.isArray(v.kids))return Object.assign(blank(),v);}catch(e){}return blank();}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
 
@@ -1270,7 +1280,7 @@ function renderWizard(){
   $('gu').innerHTML='<option value="">구를 골라 주세요</option>'+GUS.map(g=>`<option value="${g}" ${S.gu===g?'selected':''}>${g}</option>`).join('');
   $('guBox').hidden=S.region!=='seoul';
   opts($('o-inc'),'inc',INC.map(x=>[x[0],x[1]]),'radio',v=>S.inc===v,i=>{S.inc=i.value;save();});
-  $('x-unpaid').checked=S.unpaid;$('x-sme').checked=S.sme;$('x-work').checked=S.work;$('x-etc').checked=!!S.etc;$('etcHint').hidden=!S.etc;
+  $('x-unpaid').checked=S.unpaid;$('x-sme').checked=S.sme;$('x-work').checked=S.work;$('x-fac').checked=!!S.fac;$('x-etc').checked=!!S.etc;$('etcHint').hidden=!S.etc;
   showStep(S.done?1:step);
   $('wizard').hidden=S.done; $('results').hidden=!S.done;
   if(S.done)renderResults();
@@ -1280,7 +1290,7 @@ function renderKids(){
   S.kids.forEach((k,i)=>$('kid'+i).addEventListener('change',e=>{S.kids[i]=e.target.value;save();}));
 }
 $('gu').addEventListener('change',e=>{S.gu=e.target.value||null;save();});
-['x-unpaid','x-sme','x-work','x-etc'].forEach(id=>$(id).addEventListener('change',e=>{S[id.slice(2)]=e.target.checked;save();if(id==='x-etc')$('etcHint').hidden=!e.target.checked;}));
+['x-unpaid','x-sme','x-work','x-fac','x-etc'].forEach(id=>$(id).addEventListener('change',e=>{S[id.slice(2)]=e.target.checked;save();if(id==='x-etc')$('etcHint').hidden=!e.target.checked;}));
 function showStep(n){step=n;document.querySelectorAll('[data-step]').forEach(d=>d.hidden=+d.dataset.step!==n);
   document.querySelectorAll('#stepDots span:not(.count)').forEach((s,i)=>{s.classList.toggle('on',i===n-1);if(i===n-1)s.setAttribute('aria-current','step');else s.removeAttribute('aria-current');});
   $('stepCount').textContent=n+'/3단계';$('wzErr').hidden=true;
@@ -1347,7 +1357,7 @@ function guPolicies(c){
 function policies(){
   const c=ctx(), L=[];
   const P=(o)=>L.push(o);
-  const hbLimit=c.youth?0.72:0.65;
+  const hbLimit=0.65;
   // 경제
   P({id:'cs',cat:'econ',name:c.youth?'청소년 한부모 아동양육비':'한부모 아동양육비',org:'성평등가족부 · 동주민센터',
     fit:c.minor.length?'yes':'no',limit:hbLimit,
@@ -1356,11 +1366,11 @@ function policies(){
     why:(c.youth?'만 24세 이하 부모, 18세 미만 자녀 1명당 월 37만원(0~1세 40만원)':'18세 미만 자녀 1명당 월 23만원')+'. 신청하면 한부모가족증명서도 받을 수 있어서 다른 감면·혜택의 열쇠가 됩니다',
     who:`소득인정액이 기준 중위소득 ${Math.round(hbLimit*100)}% 이하 (${c.hh}인 가구 월 ${won(c.med*hbLimit)})`,how:'주소지 동주민센터 또는 복지로 온라인',link:'https://www.bokjiro.go.kr',taper:true});
   P({id:'cs-young',where:'center',cat:'econ',name:'청년 한부모 추가아동양육비',org:'성평등가족부',fit:(c.young&&c.minor.length)?'yes':'no',limit:0.65,amt:`월 ${c.minor.length*10}만원 추가`,mon:c.minor.length*10,
-    why:'만 25~34세 한부모, 18세 미만 자녀 1명당 월 10만원 추가',who:'아동양육비와 같은 소득 기준',how:'아동양육비와 함께 신청',link:'https://www.bokjiro.go.kr',taper:true});
+    why:'만 25~34세 한부모, 18세 미만 자녀 1명당 월 10만원 추가 (고등학생이면 만 22세 미만까지)',who:'아동양육비와 같은 소득 기준',how:'아동양육비와 함께 신청',link:'https://www.bokjiro.go.kr',taper:true});
   P({id:'cs-extra',where:'center',cat:'econ',name:'추가아동양육비',org:'성평등가족부',fit:(S.situ==='unm'&&c.old&&c.under6.length)?'yes':'no',limit:0.65,amt:`월 ${c.under6.length*10}만원 추가`,mon:c.under6.length*10,
-    why:'35세 이상 미혼 한부모의 만 5세 이하 자녀 1명당 월 10만원',who:'아동양육비와 같은 소득 기준',how:'아동양육비와 함께 신청',link:'https://www.bokjiro.go.kr',taper:true});
+    why:'만 35세 이상 미혼 한부모의 만 5세 이하 자녀 1명당 월 10만원 추가 (이혼·사별 한부모는 해당하지 않습니다)',who:'아동양육비와 같은 소득 기준',how:'아동양육비와 함께 신청',link:'https://www.bokjiro.go.kr',taper:true});
   P({id:'seoul-youth',cat:'econ',name:'서울형 청소년 한부모 추가 아동양육비',org:'서울시 · 동주민센터',fit:(c.youth&&c.seoul&&c.minor.length)?'yes':'no',limit:0.9,amt:`자녀 1명당 월 20만원`,mon:c.minor.length*20,
-    why:'서울에 사는 24세 이하 청소년 한부모에게 서울시가 자녀 1명당 아동양육비를 월 20만원 더 줍니다. 나라 기준(중위소득 72%)을 넘어도 90% 이하면 받을 수 있습니다',who:'서울 거주 24세 이하 한부모, 기준 중위소득 90% 이하',how:'주소지 동주민센터 또는 복지로 · 문의 서울시 가족담당관 02-2133-6564',link:'https://news.seoul.go.kr/welfare/archives/554926',srcLabel:'서울시 2026년 안내'});
+    why:'서울에 사는 24세 이하 청소년 한부모에게 서울시가 자녀 1명당 아동양육비를 월 20만원 더 줍니다. 나라 기준(중위소득 65%)을 넘어도 90% 이하면 받을 수 있고, 65% 이하면 나라 양육비에 더해 받습니다',who:'서울 거주 24세 이하 한부모, 기준 중위소득 90% 이하',how:'주소지 동주민센터 또는 복지로 · 문의 서울시 가족담당관 02-2133-6564',link:'https://news.seoul.go.kr/welfare/archives/554926',srcLabel:'서울시 2026년 안내'});
   P({id:'seoul-selfpay',cat:'econ',name:'서울형 청소년 한부모 자립촉진수당',org:'서울시 · 동주민센터',fit:(c.youth&&c.seoul&&c.minor.length)?'maybe':'no',limit:0.9,amt:'월 10만원',
     why:'학업·취업 등 자립 활동을 하는 청소년 한부모에게 월 10만원을 따로 줍니다. 아동양육비와 조건이 달라서 별도로 확인해야 합니다',who:'서울 거주 24세 이하 한부모, 자립 활동 요건 충족 (세부 조건은 동주민센터 확인)',how:'주소지 동주민센터 · 문의 서울시 가족담당관 02-2133-6564',link:'https://news.seoul.go.kr/welfare/archives/554926',forceCheck:true,srcLabel:'서울시 2026년 안내'});
   P({id:'ged',cat:'econ',name:'청소년 한부모 검정고시 학습비',org:'성평등가족부 · 동주민센터',fit:c.youth?'maybe':'no',limit:0.72,amt:'연 최대 154만원',
@@ -1421,8 +1431,8 @@ function policies(){
     why:'이사할 때 늘어난 보증금 차액을 최대 500만원까지 무이자로 빌려줍니다. 지금 보증금이 수도권 1억 4,500만원 이하여야 합니다',who:'기준 중위소득 100% 이하, 18세 이하 자녀(재학 중이면 22세 이하), 조손가족 포함',how:'서울시 한부모가족지원센터 02-6337-3026',link:'https://seoulhanbumo.or.kr'});
   P({id:'lh',cat:'house',name:'공공임대주택 우선공급',org:'LH · SH · 지자체',fit:c.minor.length?'maybe':'no',limit:null,amt:'시세보다 낮은 임대료',
     why:'한부모가족은 국민임대·영구임대·매입임대 등 공공임대주택에 우선 신청할 수 있습니다. 공동생활가정형 매입임대는 최대 6년까지 살 수 있습니다',who:'무주택 한부모가족. 소득·자산·우선공급 요건은 임대 유형과 모집 공고마다 다릅니다',how:'LH 청약플러스·SH 공고 확인 · 동주민센터 상담',link:'https://apply.lh.or.kr',forceCheck:true,srcLabel:'2026 한부모가족 복지서비스 종합안내서 (성평등가족부)'});
-  P({id:'facility',cat:'house',name:'한부모가족복지시설',org:'성평등가족부 · 지자체',fit:c.minor.length?'maybe':'no',limit:null,amt:'주거 + 생활보조금 월 10만원',
-    why:'주거가 불안정할 때 일정 기간 머물며 자립을 준비합니다. 입소 저소득 가구는 생활보조금 월 10만원',who:'시설 유형별로 기준이 다릅니다',how:'동주민센터 상담',link:'https://www.mogef.go.kr/sp/fam/sp_fam_f006.do',forceCheck:true});
+  P({id:'facility',cat:'house',name:S.fac?'시설 입소 가구 생활보조금':'한부모가족복지시설',org:'성평등가족부 · 지자체',fit:c.minor.length?(S.fac?'yes':'maybe'):'no',limit:S.fac?0.65:null,amt:S.fac?'가구당 월 10만원':'주거 + 생활보조금 월 10만원',mon:S.fac?10:0,
+    why:S.fac?'한부모가족복지시설에 사는 저소득 한부모가족은 아동양육비와 별도로 생활보조금 월 10만원을 받습니다. 시설에서 대신 신청해 주는 경우가 많으니 담당 선생님께 확인하세요':'주거가 불안정할 때 일정 기간 머물며 자립을 준비합니다. 입소 저소득 가구는 생활보조금 월 10만원',who:'시설 유형별로 기준이 다릅니다',how:'동주민센터 상담',link:'https://www.mogef.go.kr/sp/fam/sp_fam_f006.do',forceCheck:true});
   // 기타
   P({id:'ibk-life',cat:'etc',name:'On-IBK 함께 돌봄 생계비·주거비',org:'IBK기업은행 × 성평등가족부',fit:(S.page!=='o')?'yes':'no',limit:1.0,amt:'월 50만원 × 5개월, 주거비 최대 500만원',
     why:'청년 미혼·한부모에게 긴급생계비 월 50만원을 최대 5개월(최대 250만원), 보증금·이사비 등 주거비를 최대 500만원 지원하고 임시주거·주거 컨설팅도 합니다. 임신 중이거나 본인·자녀가 중증질환이면, 주거비는 36개월 이하 자녀가 있으면 우선입니다',who:'청년 미혼·한부모 기준 중위소득 100% 이하 (청소년 미혼·한부모는 50% 초과~100% 이하). 청년 나이 범위는 발표되지 않았습니다',how:'지자체·한부모시설·가족센터를 통해 안내 · 생계비 IBK행복나눔재단 02-3789-3981 · 주거비 한국미혼모지원네트워크 02-734-5007',link:'https://www.newspim.com/news/view/20260916000890',srcLabel:'뉴스핌 (2026.9.17)',forceCheck:true});
@@ -1463,6 +1473,7 @@ function policies(){
   P({id:'famcenter',cat:'mind',name:'가족센터 한부모가족 사례관리 (온가족보듬)',org:'성평등가족부 · 가족센터',fit:'yes',limit:null,amt:'무료',
     why:'상담과 사례관리, 아이 학습·정서 지원, 생활 도움, 위기 때 긴급 돌봄까지 가족센터가 연결해 줍니다. 청소년 한부모는 본인 학습·법률 지원도 받습니다',who:'자녀를 키우는 한부모·조손가족, 청소년 한부모, 위기가족',how:'가족센터 1577-9337 · 가족상담전화 1577-4206 (24시간)',link:'https://www.familynet.or.kr',srcLabel:'2026 한부모가족 복지서비스 종합안내서 (성평등가족부)'});
   return L.map(p=>{let st;if(p.fit==='no')st='na';else if(p.custom)st=p.custom();else st=incStatus(c,p.limit);
+    if(S.fac&&st==='ok'&&p.cat==='house'&&p.id!=='facility'){st='check';p.facNote=true;}
     if(st==='ok'&&(p.fit==='maybe'||p.forceCheck))st='check';
     return Object.assign(p,{st});}).concat(guPolicies(c));
 }
@@ -1502,7 +1513,7 @@ function prepHtml(show){
    <ul><li>신분증, 통장 사본 (지원금 받을 계좌)</li><li>세 들어 산다면 임대차계약서</li><li>일하고 있다면 최근 급여 내역 (소득을 확인합니다)</li><li>이혼·별거 중이라 서류가 없다면 그 사정을 말해 주세요. 상황별로 필요한 서류를 안내받을 수 있습니다</li><li>'사회보장급여 신청서'와 '금융정보 제공 동의서'는 센터에서 바로 씁니다</li></ul>
    <p class="small muted" style="margin:8px 0 0">가기 전에 동주민센터에 전화해서 필요한 서류를 물어보면 헛걸음을 줄일 수 있습니다. 복지로(bokjiro.go.kr)에서 온라인으로 신청해도 됩니다.</p></section>`;}
 function medHtml(c){
-  const rows=[[0.32,'생계급여'],[0.4,'의료급여'],[0.48,'주거급여'],[0.5,'교육급여 · 차상위'],[0.65,'한부모 아동양육비'],[0.72,'청소년 한부모'],[0.75,'긴급복지'],[1.0,'서울시 센터 사업 일부'],[1.25,'무료법률구조']];
+  const rows=[[0.32,'생계급여'],[0.4,'의료급여'],[0.48,'주거급여'],[0.5,'교육급여 · 차상위'],[0.65,'한부모 아동양육비'],[0.72,'청소년 한부모 자립지원'],[0.75,'긴급복지'],[1.0,'서울시 센터 사업 일부'],[1.25,'무료법률구조']];
   return `<details class="na" style="margin:8px 0 0"><summary>'기준 중위소득 ○○%'가 우리 집은 얼마인가요? (${c.hh}인 가구)</summary>
    <p style="margin:6px 0">지원 기준에 나오는 퍼센트를 우리 가족 수에 맞는 월 금액으로 바꿔 봤습니다 (2026년 기준). 비교하는 금액은 월급만이 아니라 재산을 소득으로 바꿔 더한 '소득인정액'입니다.</p>
    <table class="medtab"><tbody>${rows.map(([r,l])=>`<tr><td>${Math.round(r*100)}%</td><td>${l}</td><td>월 ${won(c.med*r)}</td></tr>`).join('')}</tbody></table></details>`;}
@@ -1518,6 +1529,7 @@ function renderResults(){
   let h=`<div class="result-head"><div><p class="muted small" style="margin:0">${c.hh}인 가구 · 자녀 ${S.kids.length}명 · ${esc(band?band[1]:'')}</p><h2>우리 가족이 확인해 볼 지원 ${show.length}개를 찾았습니다</h2></div>
     <div class="row"><button class="btn small" id="reEdit">정보 수정</button></div></div>
     <p class="notice">참고용 결과입니다. 실제 대상 여부는 신청하는 곳에서 확인합니다.</p>
+    ${S.fac?'<p class="notice">시설에 살고 있다고 답하셨습니다. 주거급여·주거 지원처럼 시설에 사는 동안 받을 수 없거나 금액이 달라지는 지원이 있어, 집 관련 지원은 모두 \'확인 필요\'로 표시했습니다. 시설 담당 선생님이나 동주민센터에 꼭 확인하세요.</p>':''}
     ${summaryHtml(show)}
     ${medHtml(c)}
     <details class="na glossary" style="margin:6px 0 0"><summary>어려운 말 풀이</summary><dl>
@@ -1621,6 +1633,7 @@ const ROADMAP=[
   {t:'제안서 제출',d:'12월',s:'',x:'서울시·자치구·성평등가족부에 근거와 함께 제출해요'},
   {t:'결과 공유',d:'제출 후',s:'',x:'무엇을 제안했고 어떤 답을 받았는지 여기 공개해요'}];
 const CHANGELOG=[
+  ['10/31','시설에 사는 가족을 위한 질문을 넣고, 부모 나이별 지원 기준을 설명했어요'],
   ['10/28','휴대폰·PC 화면을 골라 볼 수 있게 했어요'],
   ['10/27','공개를 원하지 않는 이야기도 정책 근거로만 쓰이도록 바꿨어요'],
   ['10/26','휴대폰에서 글자가 너무 크다는 의견을 듣고 글자 크기를 줄였어요'],
@@ -1670,6 +1683,24 @@ function showReward(){const box=$('rewardBox'),a=$('rewardLink');box.hidden=fals
   if(REWARD_FORM){a.href=REWARD_FORM;a.removeAttribute('aria-disabled');a.style.pointerEvents='';a.style.opacity='';$('rewardNote').hidden=true;}
   else{a.removeAttribute('href');a.setAttribute('aria-disabled','true');a.style.pointerEvents='none';a.style.opacity='.5';$('rewardNote').hidden=false;}
   box.focus();box.scrollIntoView({block:'center'});}
+
+
+/* ---------- 웹앱 (홈 화면에 추가) ---------- */
+(()=>{
+  const standalone=matchMedia('(display-mode: standalone)').matches||navigator.standalone===true;
+  if('serviceWorker' in navigator&&location.protocol==='https:')navigator.serviceWorker.register('/sw.js').catch(()=>{});
+  const row=$('installRow'),btn=$('installBtn'),help=$('installHelp');if(!row)return;
+  if(standalone){row.hidden=true;return;}
+  let deferred=null;
+  addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferred=e;});
+  addEventListener('appinstalled',()=>{row.hidden=true;toast('홈 화면에 한눈체크를 추가했어요');});
+  btn.addEventListener('click',async()=>{
+    if(deferred){deferred.prompt();await deferred.userChoice.catch(()=>{});deferred=null;return;}
+    const ios=/iphone|ipad|ipod/i.test(navigator.userAgent);
+    help.textContent=ios?'사파리 아래쪽 공유 버튼(□↑)을 누르고 \'홈 화면에 추가\'를 골라 주세요.'
+      :'브라우저 메뉴(⋮)에서 \'홈 화면에 추가\' 또는 \'앱 설치\'를 골라 주세요.';
+    help.hidden=false;});
+})();
 
 /* ---------- 사이트 의견 (페이지 경험) ---------- */
 document.querySelectorAll('input[name=fbr]').forEach(i=>radioToggle(i,()=>{}));

@@ -13,8 +13,8 @@ export default async function handler(req, res) {
     const sql = getSql(); await ensureTables(sql);
     if (kind === 'stories') {
       const s = cleanStory(data); if (!s) return res.status(400).json({ error: '필수 항목이 비었어요' });
-      await sql`INSERT INTO stories (role, code, cat, tags, wants, helped, is_public, opinion, main, exp, process, gap, change)
-        VALUES (${s.role}, ${s.code}, ${s.cat}, ${s.tags}, ${s.wants}, ${s.helped}, ${s.isPublic}, ${s.opinion}, ${s.main}, ${s.exp}, ${s.process}, ${s.gap}, ${s.change})`;
+      await sql`INSERT INTO stories (role, gender, code, cat, tags, wants, helped, is_public, opinion, main, exp, process, gap, change)
+        VALUES (${s.role}, ${s.gender}, ${s.code}, ${s.cat}, ${s.tags}, ${s.wants}, ${s.helped}, ${s.isPublic}, ${s.opinion}, ${s.main}, ${s.exp}, ${s.process}, ${s.gap}, ${s.change})`;
     } else if (kind === 'experiences') {
       const e = cleanExperience(data); if (!e) return res.status(400).json({ error: '잘못된 응답' });
       await sql`INSERT INTO experiences (policy, status, follow) VALUES (${e.policy}, ${e.status}, ${e.follow})`;

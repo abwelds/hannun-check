@@ -40,6 +40,10 @@ SELECT unnest(helped) AS helped, count(*) FROM stories WHERE NOT example GROUP B
 -- 6-3) 지원에 대한 생각(열린 질문) 모아 보기
 SELECT id, is_public, helped, wants, opinion FROM stories WHERE opinion IS NOT NULL ORDER BY created_at;
 
+-- 6-4) 성별로 나눠 보기 (선택 문항 · f 여성 / m 남성 / n 답하지 않음 / 빈칸 고르지 않음)
+SELECT coalesce(gender,'(빈칸)') AS gender, count(*) FROM stories WHERE NOT example GROUP BY 1 ORDER BY 2 DESC;
+SELECT coalesce(gender,'(빈칸)') AS gender, unnest(wants) AS wants, count(*) FROM stories WHERE NOT example GROUP BY 1,2 ORDER BY 1,3 DESC;
+
 -- 7) 사이트 사용 의견 (UI 개선용)
 SELECT id, created_at, page, rating, text FROM feedback ORDER BY created_at DESC;
 SELECT rating, count(*) FROM feedback GROUP BY rating;

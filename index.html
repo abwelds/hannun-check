@@ -913,8 +913,10 @@ html.vm #buddyBtn{display:none !important}
             <p class="small muted hint2">중소기업 근로자·소상공인을 말해요. 대기업·중견기업·공공기관이 아니면 대부분 해당돼요. 정확한 기준은 업종과 매출에 따라 달라요.</p>
             <label class="chk"><input type="checkbox" id="x-work">월급에서 고용보험료가 빠져나가고 있습니다</label>
             <p class="small muted hint2">월급 명세서에 '고용보험'이 적혀 있으면 가입된 거예요. 육아휴직급여 등을 받을 때 필요해요.</p>
-            <label class="chk"><input type="checkbox" id="x-fac">한부모가족복지시설(모자가족·미혼모자 시설 등)에 살고 있습니다</label>
+            <label class="chk"><input type="checkbox" id="x-fac">한부모가족복지시설(모자·부자가족 시설, 미혼모자 시설 등)에 살고 있습니다</label>
             <p class="small muted hint2">시설에 살면 받을 수 없거나 달라지는 지원이 있어서 결과에 따로 표시해 드려요.</p>
+            <label class="chk"><input type="checkbox" id="x-mig">외국에서 왔거나, 한국 국적이 아닙니다</label>
+            <p class="small muted hint2">결혼이민자 등 이주배경 부모도 한국 국적 아이를 키우고 있으면 한부모 지원을 받을 수 있어요.</p>
             <label class="chk"><input type="checkbox" id="x-etc">기타 (위에 없는 다른 상황이 있습니다)</label>
             <p class="small muted" id="etcHint" hidden style="margin:2px 0 0 30px">다른 상황은 <a href="#" data-go="story">정책 제안 참여</a>에 적어 주세요.</p>
           </fieldset>
@@ -952,6 +954,8 @@ html.vm #buddyBtn{display:none !important}
           <label class="chk"><input type="checkbox" id="s-agree">위 내용을 읽었고, 참여에 동의해요 (필수)</label>
         </div>
         <fieldset><legend>나는 어떤 입장에서 이야기하나요? <span class="req">필수</span></legend><div class="opts" id="o-role"></div></fieldset>
+        <fieldset><legend>성별 <span class="muted small">(선택)</span></legend><div class="opts" id="o-gender"></div>
+          <p class="small muted" style="margin:6px 0 0">엄마·아빠 한부모가 겪는 어려움을 나눠 살펴보는 데만 써요. 사이트에는 보이지 않아요.</p></fieldset>
         <fieldset><legend>참여 코드 <span class="muted small">(선택)</span></legend>
           <input type="text" id="s-code" maxlength="16" placeholder="예: SEOUL01" autocomplete="off" style="max-width:220px;text-transform:uppercase">
           <p class="small muted" style="margin:6px 0 0">기관에서 받은 코드가 있으면 적어 주세요.</p></fieldset>
@@ -1182,7 +1186,7 @@ const CATS=[
 const AGES=[['0-1','만 0~1세'],['2-5','만 2~5세'],['elem','초등학생'],['teen','중·고등학생'],['adult','만 18세 이상']];
 const INC=[['0','200만원 미만',0,200],['1','200~300만원',200,300],['2','300~400만원',300,400],['3','400~500만원',400,500],['4','500만원 이상',500,1e9],['x','잘 모르겠어요',null,null]];
 const SITU=[['div','이혼·별거'],['wid','사별'],['unm','미혼 한부모'],['etc','기타']];
-const PAGE=[['y','만 24세 이하'],['m','만 25~34세'],['o','만 35세 이상']];
+const PAGE=[['y','만 24세 이하'],['m','만 25~34세'],['o','만 35~44세'],['o2','만 45세 이상']];
 const REG=[['seoul','서울'],['other','서울 밖']];
 const STAGS=[['info','정보·행정'],['money','생활비·소득'],['care','돌봄 공백'],['house','주거'],['work','일·취업'],['support','양육비'],['mind','마음·관계'],['etc','기타']];
 const ROLES=[['self','한부모 당사자'],['child','한부모가정에서 자란 자녀'],['worker','현장 실무자 (센터·공무원 등)'],['other','기타 (관심 있는 시민 등)']];
@@ -1192,7 +1196,7 @@ const SCATS=[['apply','지원금·신청 서류'],['care','아이 돌보기'],['
 /* ---------- state ---------- */
 const KEY='hannun-v2';
 let S=load();
-function blank(){return {kids:[ 'elem' ],situ:null,page:null,region:null,gu:null,unpaid:false,sme:false,work:false,fac:false,etc:false,inc:null,done:false,exp:{}}}
+function blank(){return {kids:[ 'elem' ],situ:null,page:null,region:null,gu:null,unpaid:false,sme:false,work:false,fac:false,mig:false,etc:false,inc:null,done:false,exp:{}}}
 function load(){try{const v=JSON.parse(localStorage.getItem(KEY));if(v&&Array.isArray(v.kids))return Object.assign(blank(),v);}catch(e){}return blank();}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
 
@@ -1280,7 +1284,7 @@ function renderWizard(){
   $('gu').innerHTML='<option value="">구를 골라 주세요</option>'+GUS.map(g=>`<option value="${g}" ${S.gu===g?'selected':''}>${g}</option>`).join('');
   $('guBox').hidden=S.region!=='seoul';
   opts($('o-inc'),'inc',INC.map(x=>[x[0],x[1]]),'radio',v=>S.inc===v,i=>{S.inc=i.value;save();});
-  $('x-unpaid').checked=S.unpaid;$('x-sme').checked=S.sme;$('x-work').checked=S.work;$('x-fac').checked=!!S.fac;$('x-etc').checked=!!S.etc;$('etcHint').hidden=!S.etc;
+  $('x-unpaid').checked=S.unpaid;$('x-sme').checked=S.sme;$('x-work').checked=S.work;$('x-fac').checked=!!S.fac;$('x-mig').checked=!!S.mig;$('x-etc').checked=!!S.etc;$('etcHint').hidden=!S.etc;
   showStep(S.done?1:step);
   $('wizard').hidden=S.done; $('results').hidden=!S.done;
   if(S.done)renderResults();
@@ -1290,7 +1294,7 @@ function renderKids(){
   S.kids.forEach((k,i)=>$('kid'+i).addEventListener('change',e=>{S.kids[i]=e.target.value;save();}));
 }
 $('gu').addEventListener('change',e=>{S.gu=e.target.value||null;save();});
-['x-unpaid','x-sme','x-work','x-fac','x-etc'].forEach(id=>$(id).addEventListener('change',e=>{S[id.slice(2)]=e.target.checked;save();if(id==='x-etc')$('etcHint').hidden=!e.target.checked;}));
+['x-unpaid','x-sme','x-work','x-fac','x-mig','x-etc'].forEach(id=>$(id).addEventListener('change',e=>{S[id.slice(2)]=e.target.checked;save();if(id==='x-etc')$('etcHint').hidden=!e.target.checked;}));
 function showStep(n){step=n;document.querySelectorAll('[data-step]').forEach(d=>d.hidden=+d.dataset.step!==n);
   document.querySelectorAll('#stepDots span:not(.count)').forEach((s,i)=>{s.classList.toggle('on',i===n-1);if(i===n-1)s.setAttribute('aria-current','step');else s.removeAttribute('aria-current');});
   $('stepCount').textContent=n+'/3단계';$('wzErr').hidden=true;
@@ -1309,7 +1313,7 @@ function ctx(){
   const hh=Math.min(6,1+S.kids.length), med=MED[hh];
   const band=INC.find(x=>x[0]===S.inc)||INC[5];
   const k=S.kids, minor=k.filter(a=>a!=='adult'), under12=k.filter(a=>['0-1','2-5','elem'].includes(a)), under6=k.filter(a=>['0-1','2-5'].includes(a)), school=k.filter(a=>['elem','teen'].includes(a));
-  return {hh,med,lo:band[2],hi:band[3],k,minor,under12,under6,school,youth:S.page==='y',young:S.page==='m',old:S.page==='o',seoul:S.region!=='other',unm:S.situ==='unm'};
+  return {hh,med,lo:band[2],hi:band[3],k,minor,under12,under6,school,youth:S.page==='y',young:S.page==='m',old:S.page==='o'||S.page==='o2',seoul:S.region!=='other',unm:S.situ==='unm'};
 }
 function incStatus(c,ratio){ if(ratio==null||c.lo==null)return ratio==null?'ok':'check'; const t=c.med*ratio; if(c.hi<=t)return 'ok'; if(c.lo>=t)return 'over'; return 'check'; }
 const won=n=>(Math.round(n*10)/10).toLocaleString('ko-KR')+'만원';
@@ -1434,7 +1438,7 @@ function policies(){
   P({id:'facility',cat:'house',name:S.fac?'시설 입소 가구 생활보조금':'한부모가족복지시설',org:'성평등가족부 · 지자체',fit:c.minor.length?(S.fac?'yes':'maybe'):'no',limit:S.fac?0.65:null,amt:S.fac?'가구당 월 10만원':'주거 + 생활보조금 월 10만원',mon:S.fac?10:0,
     why:S.fac?'한부모가족복지시설에 사는 저소득 한부모가족은 아동양육비와 별도로 생활보조금 월 10만원을 받습니다. 시설에서 대신 신청해 주는 경우가 많으니 담당 선생님께 확인하세요':'주거가 불안정할 때 일정 기간 머물며 자립을 준비합니다. 입소 저소득 가구는 생활보조금 월 10만원',who:'시설 유형별로 기준이 다릅니다',how:'동주민센터 상담',link:'https://www.mogef.go.kr/sp/fam/sp_fam_f006.do',forceCheck:true});
   // 기타
-  P({id:'ibk-life',cat:'etc',name:'On-IBK 함께 돌봄 생계비·주거비',org:'IBK기업은행 × 성평등가족부',fit:(S.page!=='o')?'yes':'no',limit:1.0,amt:'월 50만원 × 5개월, 주거비 최대 500만원',
+  P({id:'ibk-life',cat:'etc',name:'On-IBK 함께 돌봄 생계비·주거비',org:'IBK기업은행 × 성평등가족부',fit:!c.old?'yes':'no',limit:1.0,amt:'월 50만원 × 5개월, 주거비 최대 500만원',
     why:'청년 미혼·한부모에게 긴급생계비 월 50만원을 최대 5개월(최대 250만원), 보증금·이사비 등 주거비를 최대 500만원 지원하고 임시주거·주거 컨설팅도 합니다. 임신 중이거나 본인·자녀가 중증질환이면, 주거비는 36개월 이하 자녀가 있으면 우선입니다',who:'청년 미혼·한부모 기준 중위소득 100% 이하 (청소년 미혼·한부모는 50% 초과~100% 이하). 청년 나이 범위는 발표되지 않았습니다',how:'지자체·한부모시설·가족센터를 통해 안내 · 생계비 IBK행복나눔재단 02-3789-3981 · 주거비 한국미혼모지원네트워크 02-734-5007',link:'https://www.newspim.com/news/view/20260916000890',srcLabel:'뉴스핌 (2026.9.17)',forceCheck:true});
   P({id:'leave',cat:'etc',name:'한부모 근로자 육아휴직 급여',org:'고용노동부 · 고용센터',fit:(S.work&&c.k.some(a=>['0-1','2-5'].includes(a)))?'yes':((S.work&&c.k.includes('elem'))?'maybe':'no'),limit:null,amt:'첫 3개월 월 최대 300만원',
     why:'한부모 근로자는 육아휴직 급여가 더 많습니다. 1~3개월 통상임금 100% (월 상한 300만원), 4~6개월 100% (상한 200만원), 7개월부터 80% (상한 160만원). 8세 이하(초2 이하) 자녀가 대상이고, 30일 이상 써야 합니다. 2025년 2월 23일부터 한부모는 요건을 갖추면 육아휴직을 6개월 더 쓸 수 있습니다',who:'고용보험 가입 한부모 근로자, 육아휴직 30일 이상 사용',how:'고용24 또는 고용센터 · 상담 1350 · 회사에는 휴직 전에 서면(이메일 가능)으로 신청',link:'https://www.work24.go.kr',forceCheck:true,srcLabel:'2026 한부모가족 복지서비스 종합안내서 (성평등가족부)'});
@@ -1470,6 +1474,8 @@ function policies(){
     why:'이혼·친권·양육비 같은 가사 사건과 민사·형사 사건에서 법률상담과 소송을 무료로 도와줍니다. 미혼부의 출생신고를 위한 유전자 검사비도 지원합니다',who:`기준 중위소득 125% 이하 한부모가족 (${c.hh}인 가구 월 ${won(c.med*1.25)})`,how:'대한법률구조공단 132',link:'https://www.klac.or.kr',srcLabel:'2026 한부모가족 복지서비스 종합안내서 (성평등가족부)'});
   P({id:'birthreg',cat:'house',name:'미혼부 자녀 출생신고 지원',org:'가정법원 · 대한법률구조공단',fit:(S.situ==='unm'&&baby)?'maybe':'no',limit:null,amt:'절차 안내 · 비용 지원',
     why:'아이 엄마의 인적사항을 알 수 없어도 가정법원 확인으로 출생신고를 할 수 있습니다. 절차가 진행 중이면 출생신고 전에도 아동양육비·아동수당·건강보험을 신청할 수 있습니다',who:'출생신고에 어려움이 있는 미혼부',how:'대한법률구조공단 132 · 양육비 이행 상담 1644-6621',link:'https://www.klac.or.kr',srcLabel:'2026 한부모가족 복지서비스 종합안내서 (성평등가족부)'});
+  P({id:'migrant',cat:'mind',name:'이주배경 한부모 상담 (다누리콜센터)',org:'성평등가족부 · 다누리콜센터',fit:S.mig?'yes':'no',limit:null,amt:'무료 · 여러 언어로 상담',
+    why:'외국에서 온 부모도 국내에 살면서 한국 국적 아이를 키우고 있으면 한부모가족 지원 대상이 될 수 있습니다 (한부모가족지원법 제5조의2). 이혼·사별 뒤 체류 자격이나 국적 문제, 한국어로 신청하기 어려운 일을 여러 언어로 상담해 줍니다',who:'결혼이민자 등 이주배경 한부모. 외국인등록 등 세부 조건은 동주민센터에서 확인합니다',how:'다누리콜센터 1577-1366 · 가족센터 1577-9337 · 체류·국적 법률 상담은 대한법률구조공단 132',link:'https://www.liveinkorea.kr',where:'etc'});
   P({id:'famcenter',cat:'mind',name:'가족센터 한부모가족 사례관리 (온가족보듬)',org:'성평등가족부 · 가족센터',fit:'yes',limit:null,amt:'무료',
     why:'상담과 사례관리, 아이 학습·정서 지원, 생활 도움, 위기 때 긴급 돌봄까지 가족센터가 연결해 줍니다. 청소년 한부모는 본인 학습·법률 지원도 받습니다',who:'자녀를 키우는 한부모·조손가족, 청소년 한부모, 위기가족',how:'가족센터 1577-9337 · 가족상담전화 1577-4206 (24시간)',link:'https://www.familynet.or.kr',srcLabel:'2026 한부모가족 복지서비스 종합안내서 (성평등가족부)'});
   return L.map(p=>{let st;if(p.fit==='no')st='na';else if(p.custom)st=p.custom();else st=incStatus(c,p.limit);
@@ -1572,7 +1578,7 @@ function expBlock(p){
   if(e&&FOLLOW[e.status]){const [q,ol]=FOLLOW[e.status];h+=`<div class="follow" data-pid="${p.id}"><p style="margin:6px 0">${q}</p><div class="opts">${ol.map(([v,l])=>`<label class="opt"><input type="radio" name="f-${p.id}" value="${v}"><span>${l}</span></label>`).join('')}</div></div>`;}
   return h+'</div>';}
 const CHEV='<svg class="ic chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>';
-const APPLY={"cs": ["https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00001068", "apply", "복지로"], "cs-young": ["https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00001068", "apply", "복지로"], "cs-extra": ["https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00001068", "apply", "복지로"], "edu": ["https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00001068", "apply", "복지로"], "ged": ["https://www.mogef.go.kr/sp/fam/sp_fam_f007.do", "info", "성평등가족부"], "livelihood": ["https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00001132", "apply", "복지로"], "housing": ["https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00003201", "apply", "복지로"], "medical": ["https://www.mohw.go.kr/menu.es?mid=a10708030100", "info", "보건복지부"], "eduben": ["https://oneclick.neis.go.kr", "apply", "교육비 원클릭"], "ca": ["https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00001171", "apply", "복지로"], "parentpay": ["https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00004657", "apply", "복지로"], "homecare": ["https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00003253", "apply", "복지로"], "firstpay": ["https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00004656", "apply", "복지로"], "diaper": ["https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00000092", "apply", "복지로"], "pads": ["https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00000781", "apply", "복지로"], "kinder": ["https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00000969", "apply", "복지로"], "emergency": ["https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00003180", "info", "복지로"], "youthsave": ["https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00000060", "apply", "복지로"], "hopesave": ["https://hope.welfareinfo.or.kr/bsns/bsnsIntrcnAcc2.do", "info", "자산형성포털"], "discount": ["https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00003257", "apply", "복지로"], "childcare": ["https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00003250", "apply", "복지로"], "eitc": ["https://www.nts.go.kr/nts/cm/cntnts/cntntsView.do?mi=40397&cntntsId=238977", "info", "국세청"], "ctc": ["https://www.nts.go.kr/nts/cm/cntnts/cntntsView.do?mi=40397&cntntsId=238977", "info", "국세청"], "taxded": ["https://www.nts.go.kr/nts/cm/cntnts/cntntsView.do?cntntsId=238938&mi=6645", "info", "국세청"], "idolbom": ["https://idolbom.go.kr/front/srvcUtztnGuide/srvcApply", "apply", "아이돌봄 누리집"], "leave": ["https://www.work24.go.kr/cm/c/f/1100/selecSystInfo.do?systClId=SC00000251&systId=SI00000402", "apply", "고용24"], "job": ["https://www.work24.go.kr/ua/z/z/1300/selectEmssRqutIntro.do", "apply", "고용24"], "adv": ["https://www.childsupport.or.kr/lay1/program/S1T135C138/part/part_01_03.do", "apply", "양육비이행관리원"], "support": ["https://www.childsupport.or.kr/lay1/program/S1T23C24/part/part_01_01.do", "apply", "양육비이행관리원"], "legal": ["https://www.klac.or.kr/legalstruct/cyberConsultation.do", "apply", "법률구조공단"], "birthreg": ["https://www.klac.or.kr/legalstruct/cyberConsultation.do", "apply", "법률구조공단"], "famcenter": ["https://www.familynet.or.kr/web/lay1/program/S1T1C307/info/view.do", "info", "가족센터"], "facility": ["https://www.mogef.go.kr/cs/opf/cs_opf_f041.do", "info", "성평등가족부"], "seoul-youth": ["https://news.seoul.go.kr/welfare/archives/554346", "info", "서울시"], "seoul-selfpay": ["https://news.seoul.go.kr/welfare/archives/554346", "info", "서울시"], "seoul-bus": ["https://news.seoul.go.kr/welfare/archives/548149", "info", "서울시"], "seoul-hsedu": ["https://news.seoul.go.kr/welfare/archives/548149", "info", "서울시"], "seoul-house": ["https://seoulhanbumo.or.kr/han/contents/han-reinforceCapa.do", "info", "한부모가족지원센터"], "seoul-counsel": ["https://seoulhanbumo.or.kr/han/contents/han-reinforceCapa.do", "info", "한부모가족지원센터"], "seoul-mentor": ["https://seoulhanbumo.or.kr/han/contents/han-reinforceCapa.do", "info", "한부모가족지원센터"], "seoul-loan": ["https://seoulhanbumo.or.kr/han/contents/han-reinforceCapa.do", "info", "한부모가족지원센터"], "seoul-comm": ["https://seoulhanbumo.or.kr/han/contents/han-supportVitalize.do", "info", "한부모가족지원센터"], "lh": ["https://apply.lh.or.kr/lhapply/apply/wt/wrtanc/selectWrtancList.do?mi=1026", "info", "LH청약플러스"], "insure": ["https://www.kinfa.or.kr/financialProduct/singleParentInsurance.do", "info", "서민금융진흥원"], "didim": ["https://www.ncrc.or.kr/ncrc/cm/cntnts/cntntsView.do?mi=1035&cntntsId=1142", "info", "아동권리보장원"], "culture": ["https://www.mnuri.kr/card/cardMain/cardIssue_step00.do", "apply", "문화누리"], "sports": ["https://svoucher.kspo.or.kr/voucher/voucherSelectArea.do?menuNo=11&topMenuNo=3", "apply", "스포츠강좌이용권"], "license": ["https://www.koroad.or.kr/main/content/view/MN03040401.do", "info", "도로교통공단"], "palace": ["https://royal.khs.go.kr/ROYAL/contents/R703000000.do", "info", "궁능유적본부"], "ibk-care": ["https://www.ibkfoundation.or.kr/childcare/info?mn=71", "info", "IBK행복나눔재단"], "ibk-life": ["https://www.ibkfoundation.or.kr/boarddata/view?board_seq=1&board_data_seq=4340&mn=15", "info", "IBK행복나눔재단"]};
+const APPLY={"cs": ["https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00001068", "apply", "복지로"], "cs-young": ["https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00001068", "apply", "복지로"], "cs-extra": ["https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00001068", "apply", "복지로"], "edu": ["https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00001068", "apply", "복지로"], "ged": ["https://www.mogef.go.kr/sp/fam/sp_fam_f007.do", "info", "성평등가족부"], "livelihood": ["https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00001132", "apply", "복지로"], "housing": ["https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00003201", "apply", "복지로"], "medical": ["https://www.mohw.go.kr/menu.es?mid=a10708030100", "info", "보건복지부"], "eduben": ["https://oneclick.neis.go.kr", "apply", "교육비 원클릭"], "ca": ["https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00001171", "apply", "복지로"], "parentpay": ["https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00004657", "apply", "복지로"], "homecare": ["https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00003253", "apply", "복지로"], "firstpay": ["https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00004656", "apply", "복지로"], "diaper": ["https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00000092", "apply", "복지로"], "pads": ["https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00000781", "apply", "복지로"], "kinder": ["https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00000969", "apply", "복지로"], "emergency": ["https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00003180", "info", "복지로"], "youthsave": ["https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00000060", "apply", "복지로"], "hopesave": ["https://hope.welfareinfo.or.kr/bsns/bsnsIntrcnAcc2.do", "info", "자산형성포털"], "discount": ["https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00003257", "apply", "복지로"], "childcare": ["https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId=WLF00003250", "apply", "복지로"], "eitc": ["https://www.nts.go.kr/nts/cm/cntnts/cntntsView.do?mi=40397&cntntsId=238977", "info", "국세청"], "ctc": ["https://www.nts.go.kr/nts/cm/cntnts/cntntsView.do?mi=40397&cntntsId=238977", "info", "국세청"], "taxded": ["https://www.nts.go.kr/nts/cm/cntnts/cntntsView.do?cntntsId=238938&mi=6645", "info", "국세청"], "idolbom": ["https://idolbom.go.kr/front/srvcUtztnGuide/srvcApply", "apply", "아이돌봄 누리집"], "leave": ["https://www.work24.go.kr/cm/c/f/1100/selecSystInfo.do?systClId=SC00000251&systId=SI00000402", "apply", "고용24"], "job": ["https://www.work24.go.kr/ua/z/z/1300/selectEmssRqutIntro.do", "apply", "고용24"], "adv": ["https://www.childsupport.or.kr/lay1/program/S1T135C138/part/part_01_03.do", "apply", "양육비이행관리원"], "support": ["https://www.childsupport.or.kr/lay1/program/S1T23C24/part/part_01_01.do", "apply", "양육비이행관리원"], "legal": ["https://www.klac.or.kr/legalstruct/cyberConsultation.do", "apply", "법률구조공단"], "birthreg": ["https://www.klac.or.kr/legalstruct/cyberConsultation.do", "apply", "법률구조공단"], "famcenter": ["https://www.familynet.or.kr/web/lay1/program/S1T1C307/info/view.do", "info", "가족센터"], "migrant": ["https://www.liveinkorea.kr", "info", "다누리"], "facility": ["https://www.mogef.go.kr/cs/opf/cs_opf_f041.do", "info", "성평등가족부"], "seoul-youth": ["https://news.seoul.go.kr/welfare/archives/554346", "info", "서울시"], "seoul-selfpay": ["https://news.seoul.go.kr/welfare/archives/554346", "info", "서울시"], "seoul-bus": ["https://news.seoul.go.kr/welfare/archives/548149", "info", "서울시"], "seoul-hsedu": ["https://news.seoul.go.kr/welfare/archives/548149", "info", "서울시"], "seoul-house": ["https://seoulhanbumo.or.kr/han/contents/han-reinforceCapa.do", "info", "한부모가족지원센터"], "seoul-counsel": ["https://seoulhanbumo.or.kr/han/contents/han-reinforceCapa.do", "info", "한부모가족지원센터"], "seoul-mentor": ["https://seoulhanbumo.or.kr/han/contents/han-reinforceCapa.do", "info", "한부모가족지원센터"], "seoul-loan": ["https://seoulhanbumo.or.kr/han/contents/han-reinforceCapa.do", "info", "한부모가족지원센터"], "seoul-comm": ["https://seoulhanbumo.or.kr/han/contents/han-supportVitalize.do", "info", "한부모가족지원센터"], "lh": ["https://apply.lh.or.kr/lhapply/apply/wt/wrtanc/selectWrtancList.do?mi=1026", "info", "LH청약플러스"], "insure": ["https://www.kinfa.or.kr/financialProduct/singleParentInsurance.do", "info", "서민금융진흥원"], "didim": ["https://www.ncrc.or.kr/ncrc/cm/cntnts/cntntsView.do?mi=1035&cntntsId=1142", "info", "아동권리보장원"], "culture": ["https://www.mnuri.kr/card/cardMain/cardIssue_step00.do", "apply", "문화누리"], "sports": ["https://svoucher.kspo.or.kr/voucher/voucherSelectArea.do?menuNo=11&topMenuNo=3", "apply", "스포츠강좌이용권"], "license": ["https://www.koroad.or.kr/main/content/view/MN03040401.do", "info", "도로교통공단"], "palace": ["https://royal.khs.go.kr/ROYAL/contents/R703000000.do", "info", "궁능유적본부"], "ibk-care": ["https://www.ibkfoundation.or.kr/childcare/info?mn=71", "info", "IBK행복나눔재단"], "ibk-life": ["https://www.ibkfoundation.or.kr/boarddata/view?board_seq=1&board_data_seq=4340&mn=15", "info", "IBK행복나눔재단"]};
 function applyBtn(p,big){
   if(whereOf(p)==='auto')return `<span class="rc-auto${big?' big':''}">자동 지급 · 신청 필요 없음</span>`;
   const site=u=>/gov\.kr/.test(u)?'정부24':/\.go\.kr|\.seoul\.kr/.test(u)?'구청':'관련 기사';
@@ -1633,6 +1639,7 @@ const ROADMAP=[
   {t:'제안서 제출',d:'12월',s:'',x:'서울시·자치구·성평등가족부에 근거와 함께 제출해요'},
   {t:'결과 공유',d:'제출 후',s:'',x:'무엇을 제안했고 어떤 답을 받았는지 여기 공개해요'}];
 const CHANGELOG=[
+  ['10/31','이주배경 한부모 안내를 넣고, 나이 선택지를 더 나눴어요'],
   ['10/31','시설에 사는 가족을 위한 질문을 넣고, 부모 나이별 지원 기준을 설명했어요'],
   ['10/28','휴대폰·PC 화면을 골라 볼 수 있게 했어요'],
   ['10/27','공개를 원하지 않는 이야기도 정책 근거로만 쓰이도록 바꿨어요'],
@@ -1648,12 +1655,13 @@ function wantCounts(arr){return countBy(arr,WANTS,'wants');}
 function barsHtml(list,c){const tot=Object.values(c).reduce((a,b)=>a+b,0);if(!tot)return '<div class="empty">아직 응답이 없어요. 첫 번째로 목소리를 보태 주세요.</div>';const so=list.map(([k,l])=>[l,c[k]]).filter(x=>x[1]).sort((a,b)=>b[1]-a[1]);return so.map(([l,n])=>`<div class="bar"><span>${esc(l)}</span><div class="track"><div class="fill" style="width:${n/so[0][1]*100}%"></div></div><span class="v">${n}명</span></div>`).join('');}
 
 /* ---------- story ---------- */
-let storyCat=null, storyRole=null; const storyTags=new Set(), storyWants=new Set(), storyHelped=new Set();
+let storyCat=null, storyRole=null, storyGender=null; const storyTags=new Set(), storyWants=new Set(), storyHelped=new Set();
 const pick2=set=>i=>{if(i.checked){if(set.size>=2){i.checked=false;toast('최대 2개까지 고를 수 있어요');return;}set.add(i.value);}else set.delete(i.value);};
 opts($('o-helped'),'shelp',HELPED,'checkbox',()=>false,pick2(storyHelped));
 const WANTS_SHUF=WANTS.filter(w=>w[0]!=='etc').sort(()=>Math.random()-.5).concat([WANTS.find(w=>w[0]==='etc')]); // 보기 순서가 답을 이끌지 않도록 사람마다 순서를 섞어요
 opts($('o-wants'),'swant',WANTS_SHUF,'checkbox',()=>false,pick2(storyWants));
 opts($('o-role'),'srole',ROLES,'radio',()=>false,i=>storyRole=i.value);
+opts($('o-gender'),'sgender',[['f','여성'],['m','남성'],['n','답하지 않을래요']],'radio',()=>false,i=>storyGender=i.value);
 opts($('o-scat'),'scat',SCATS,'radio',()=>false,i=>storyCat=i.value);
 opts($('o-tags'),'stag',STAGS,'checkbox',()=>false,i=>{i.checked?storyTags.add(i.value):storyTags.delete(i.value);});
 $('storyForm').addEventListener('submit',async e=>{e.preventDefault();
@@ -1665,13 +1673,13 @@ $('storyForm').addEventListener('submit',async e=>{e.preventDefault();
   if(code&&!/^[A-Z0-9-]{2,16}$/.test(code)){toast('참여 코드는 영문과 숫자로만 적어 주세요');return;}
   if(!Object.values(texts).some(Boolean)&&!storyTags.size&&!storyWants.size&&!storyHelped.size){toast('질문 하나 이상에 답하거나 어려움을 골라 주세요');return;}
   const pub=document.querySelector('input[name=pub]:checked').value==='1';
-  const doc={cat:storyCat,role:storyRole,code:code||null,tags:[...storyTags],wants:[...storyWants],helped:[...storyHelped],public:pub,example:false};
+  const doc={cat:storyCat,role:storyRole,gender:storyGender,code:code||null,tags:[...storyTags],wants:[...storyWants],helped:[...storyHelped],public:pub,example:false};
   Object.assign(doc,texts); // 비공개 글도 팀 분석용으로 저장 (사이트에는 안 보임)
   $('storySubmit').disabled=true;
   const ok=await addDoc('stories',doc,local.stories);
   if(!pub&&local.stories[0]===doc)['main','opinion','exp','process','gap','change'].forEach(k=>delete doc[k]); // 비공개 글은 이 화면에서도 내용 숨김
   $('storySubmit').disabled=false;
-  $('storyForm').reset();storyCat=null;storyRole=null;storyTags.clear();storyWants.clear();storyHelped.clear();if(presetCode)$('s-code').value=presetCode;
+  $('storyForm').reset();storyCat=null;storyRole=null;storyGender=null;storyTags.clear();storyWants.clear();storyHelped.clear();if(presetCode)$('s-code').value=presetCode;
   $('storyMsg').textContent=ok?(pub?'고마워요. 이야기가 저장됐어요. 조원이 개인정보 포함 여부를 확인한 뒤 공개돼요.':'고마워요. 이야기가 저장됐어요. 사이트에는 공개되지 않고, 조원만 정책 제안 근거로 읽어요.'):'저장 서버에 연결되지 않아 이 브라우저에서만 보여요. 잠시 후 다시 시도해 주세요.';
   toast('이야기를 남겼어요');showReward();
 });
